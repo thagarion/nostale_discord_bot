@@ -3,7 +3,7 @@
 int main(int argc, char *argv[]) {
 
     std::string TOKEN_ID = argv[1];
-    uint64_t GUILD_ID;
+    uint64_t GUILD_ID; // = argv[2];
 
     dpp::cluster bot(TOKEN_ID);
 
@@ -14,8 +14,10 @@ int main(int argc, char *argv[]) {
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_command_create(dpp::slashcommand("ping", "Проверка", bot.me.id));
-            bot.global_command_create(dpp::slashcommand("change_name", "Изменить имя на сервере", bot.me.id).add_option(
-                    dpp::command_option(dpp::co_string, "name", "Новое имя")));
+            bot.global_command_create(dpp::slashcommand("change_name", "Изменить имя на сервере", bot.me.id)
+                                              .add_option(dpp::command_option(dpp::co_string, "name", "Новое имя")));
+            bot.global_command_create(dpp::slashcommand("mara", "Начать марафон", bot.me.id)
+                                              .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
         }
     });
 
@@ -35,6 +37,13 @@ int main(int argc, char *argv[]) {
             dpp::guild guild = event.command.get_guild();
             guild.members.find(user_id)->second.set_nickname(new_name);
             event.reply(nickname + " теперь известен как " + guild.members.find(user_id)->second.get_mention());
+        }
+        if (event.command.get_command_name() == "mara") {
+            if (event.command.get_channel().id == dpp::snowflake(1269523377308041341)) {
+                event.reply("Это правильный канал");
+            } else {
+                event.reply("Эту команду можно использовать только в " + dpp::find_channel(dpp::snowflake(1269523377308041341))->get_mention());
+            }
         }
     });
 

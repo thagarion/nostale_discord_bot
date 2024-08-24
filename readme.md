@@ -1,4 +1,4 @@
-### Libs requirement
+### Required libs
 
 ```
 sudo apt-get install cmake gcc clang gdb build-essential

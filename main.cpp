@@ -1,15 +1,14 @@
 #include <dpp/dpp.h>
 
+#include "config.hpp"
+
 int main(int argc, char *argv[]) {
 
-    std::string TOKEN_ID = argv[1];
-    uint64_t GUILD_ID; // = argv[2];
+    Config config(argv[1]);
 
-    dpp::cluster bot(TOKEN_ID);
+    dpp::cluster bot(config.get_bot_token());
 
     bot.on_log(dpp::utility::cout_logger());
-
-    bot.log(dpp::loglevel::ll_debug, TOKEN_ID);
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
@@ -42,7 +41,8 @@ int main(int argc, char *argv[]) {
             if (event.command.get_channel().id == dpp::snowflake(1269523377308041341)) {
                 event.reply("Это правильный канал");
             } else {
-                event.reply("Эту команду можно использовать только в " + dpp::find_channel(dpp::snowflake(1269523377308041341))->get_mention());
+                event.reply("Эту команду можно использовать только в " +
+                            dpp::find_channel(dpp::snowflake(1269523377308041341))->get_mention());
             }
         }
     });

@@ -1,0 +1,11 @@
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortFunctionsOnASingleLine: Empty
+BraceWrapping:
+BreakConstructorInitializers: AfterColon
+ColumnLimit: 156
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+FixNamespaceComments: true
+IndentCaseLabels: true
+IndentWidth: 4

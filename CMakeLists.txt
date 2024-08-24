@@ -15,10 +15,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(dpp)
 
-include_directories(${project_name} PUBLIC ${DPP_INCLUDE_DIR})
+include_directories(${project_name} PUBLIC headers ${DPP_INCLUDE_DIR})
 
 add_executable(${project_name} PUBLIC main.cpp ${sources} ${headers})
 
-target_link_libraries(${project_name} PUBLIC dpp)
+target_link_libraries(${project_name} PUBLIC dpp yaml-cpp)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})

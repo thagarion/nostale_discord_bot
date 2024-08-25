@@ -4,13 +4,16 @@
 #include <map>
 #include <utility>
 
-class Event {
-    std::map<uint8_t, uint8_t> schedule;
+typedef std::map<uint8_t, std::vector<uint8_t> > Schedule;
 
-    [[nodiscard]] virtual std::string to_string(size_t index) const = 0;
+class Event {
+protected:
+    std::map<uint8_t, std::vector<uint8_t> > schedule;
+
+    [[nodiscard]] virtual std::string to_string(uint8_t time) const = 0;
 
 public:
-    explicit Event(std::map<uint8_t, uint8_t> times) {
+    explicit Event(Schedule times) {
         schedule = std::move(times);
     }
 
@@ -20,10 +23,11 @@ public:
 };
 
 class LandOfDeathEvent : public Event {
-    [[nodiscard]] std::string to_string(size_t index) const override {
-        return std::format("Следующий лод будет в {} часа на {} канале");
+    [[nodiscard]] std::string to_string(uint8_t time) const override {
+        return std::format("Следующий лод будет в {} часа на {} канале", time, schedule.at(time)[0]);
     }
 
 public:
-    explicit LandOfDeathEvent(std::map<uint8_t, uint8_t> times) : Event(std::move(times)) {}
+    explicit LandOfDeathEvent(Schedule times) : Event(std::move(times)) {
+    }
 };

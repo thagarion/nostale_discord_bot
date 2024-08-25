@@ -1,18 +1,21 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include "event.hpp"
 #include <yaml-cpp/yaml.h>
+
+typedef std::shared_ptr<Event> EventPtr;
 
 class Config {
     std::string token;
     uint64_t guild;
     uint64_t mara_channel;
 
-    std::map<std::string, Event> events;
+    std::map<std::string, EventPtr> events;
 
     template<typename T>
-    [[nodiscard]] T get_value(YAML::Node config, const std::string &field) const {
+    [[nodiscard]] static T get_value(YAML::Node config, const std::string &field) {
         if (!config[field]) {
             printf("error: %s not found", field.c_str());
         }
@@ -21,10 +24,27 @@ class Config {
 
 public:
     explicit Config(const std::string &path) {
-        YAML::Node config = YAML::LoadFile(path + "/config.yaml");
+        const YAML::Node config = YAML::LoadFile(path + "/config.yaml");
         token = get_value<std::string>(config, "token");
         guild = get_value<uint64_t>(config, "guild_id");
         mara_channel = get_value<uint64_t>(config, "mara_channel_id");
+
+        for (const YAML::Node events = YAML::LoadFile(path + "/events.yaml"); const auto &event : events) {
+            if (event.first.as<std::string>() == "lod") {
+                Schedule lods;
+                for (const auto &entry : event.second) {
+                    auto channels_str = entry["channel"].as<std::string>();
+                    std::stringstream ss(channels_str);
+                    std::string channel;
+                    while (std::getline(ss, channel, ',')) {
+                        channel.erase(std::ranges::remove_if(channel, ::isspace).begin(), channel.end());
+                        lods[entry["time"].as<uint8_t>()].push_back(std::stoi(channel));
+                    }
+                }
+                printf("");
+                //auto lod_entry = std::make_shared<LandOfDeathEvent>(lods);
+            }
+        }
     }
 
     [[nodiscard]] std::string get_bot_token() const { return token; }

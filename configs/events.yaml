@@ -1,0 +1,43 @@
+lod:
+  - time: 0
+    channel: 7
+  - time: 3
+    channel: 1
+  - time: 6
+    channel: 1
+  - time: 9
+    channel: 2
+  - time: 12
+    channel: 3
+  - time: 15
+    channel: 2, 3, 6
+  - time: 18
+    channel: 4, 5, 7
+  - time: 21
+    channel: 4, 5, 6
+
+lol:
+  - time: 0
+    channel: 1-7
+  - time: 2
+    channel: 1-7
+  - time: 4
+    channel: 1-7
+  - time: 6
+    channel: 1-7
+  - time: 8
+    channel: 1-7
+  - time: 10
+    channel: 1-7
+  - time: 12
+    channel: 1-7
+  - time: 14
+    channel: 1-7
+  - time: 16
+    channel: 1-7
+  - time: 18
+    channel: 1-7
+  - time: 20
+    channel: 1-7
+  - time: 22
+    channel: 1-7

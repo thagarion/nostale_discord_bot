@@ -3,8 +3,7 @@
 #include "config.hpp"
 
 int main(int argc, char *argv[]) {
-
-    Config config(argv[1]);
+    const Config config(argv[1]);
 
     dpp::cluster bot(config.get_bot_token());
 
@@ -13,26 +12,29 @@ int main(int argc, char *argv[]) {
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_command_create(dpp::slashcommand("ping", "Проверка", bot.me.id));
+            bot.global_command_create(dpp::slashcommand("lod", "Узнать время ЛоДа", bot.me.id));
             bot.global_command_create(dpp::slashcommand("change_name", "Изменить имя на сервере", bot.me.id)
-                                              .add_option(dpp::command_option(dpp::co_string, "name", "Новое имя")));
+                .add_option(dpp::command_option(dpp::co_string, "name", "Новое имя")));
             bot.global_command_create(dpp::slashcommand("mara", "Начать марафон", bot.me.id)
-                                              .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
+                .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
         }
     });
 
-    bot.on_slashcommand([](const dpp::slashcommand_t &event) {
+    bot.on_slashcommand([config](const dpp::slashcommand_t &event) {
         if (event.command.get_command_name() == "ping") {
             event.reply("Я тут");
         }
+        if (event.command.get_command_name() == "lod") {
+            event.reply(config.get_next_lod());
+        }
         if (event.command.get_command_name() == "change_name") {
-            dpp::permission permission = event.command.get_resolved_permission(event.command.usr.id);
-            if (!permission.can(dpp::p_change_nickname)) {
+            if (const dpp::permission permission = event.command.get_resolved_permission(event.command.usr.id); !permission.can(dpp::p_change_nickname)) {
                 event.reply("You don't have the required permissions to change nickname!");
                 return;
             }
-            std::string new_name = std::get<std::string>(event.get_parameter("name"));
-            dpp::snowflake user_id = event.command.get_issuing_user().id;
-            std::string nickname = event.command.get_guild().members.at(user_id).get_nickname();
+            const std::string new_name = std::get<std::string>(event.get_parameter("name"));
+            const dpp::snowflake user_id = event.command.get_issuing_user().id;
+            const std::string nickname = event.command.get_guild().members.at(user_id).get_nickname();
             dpp::guild guild = event.command.get_guild();
             guild.members.find(user_id)->second.set_nickname(new_name);
             event.reply(nickname + " теперь известен как " + guild.members.find(user_id)->second.get_mention());

@@ -29,10 +29,10 @@ public:
         guild = get_value<uint64_t>(config, "guild_id");
         mara_channel = get_value<uint64_t>(config, "mara_channel_id");
 
-        for (const YAML::Node events = YAML::LoadFile(path + "/events.yaml"); const auto &event : events) {
+        for (const YAML::Node events_node = YAML::LoadFile(path + "/events.yaml"); const auto &event: events_node) {
             if (event.first.as<std::string>() == "lod") {
                 Schedule lods;
-                for (const auto &entry : event.second) {
+                for (const auto &entry: event.second) {
                     auto channels_str = entry["channel"].as<std::string>();
                     std::stringstream ss(channels_str);
                     std::string channel;
@@ -41,8 +41,8 @@ public:
                         lods[entry["time"].as<uint8_t>()].push_back(std::stoi(channel));
                     }
                 }
-                printf("");
-                //auto lod_entry = std::make_shared<LandOfDeathEvent>(lods);
+                auto lod_entry = std::make_shared<LandOfDeathEvent>(lods);
+                events["lod"] = lod_entry;
             }
         }
     }
@@ -52,4 +52,6 @@ public:
     [[nodiscard]] uint64_t get_guild_id() const { return guild; }
 
     [[nodiscard]] uint64_t get_mara_channel_id() const { return mara_channel; }
+
+    [[nodiscard]] std::string get_next_lod() const { return events.at("lod")->get_next(); }
 };

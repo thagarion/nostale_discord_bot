@@ -23,10 +23,9 @@ public:
     virtual ~Event() = default;
 
     [[nodiscard]] virtual std::string get_next() const {
-        const auto now = std::chrono::system_clock::now();
-        const auto server_time = date::make_zoned("Europe/Berlin", now);
-        const auto local_time = server_time.get_local_time();
-        const auto server_hour = date::floor<std::chrono::hours>(local_time).time_since_epoch().count() % 24;
+        const std::time_t now = std::time(nullptr);
+        const std::tm* current_time = std::gmtime(&now);
+        const auto server_hour = current_time->tm_hour + 2;
         for (const auto &hour: std::views::keys(events)) {
             if (hour > server_hour) {
                 return to_string(hour);
@@ -39,7 +38,36 @@ public:
 class LandOfDeathEvent final : public Event {
 protected:
     [[nodiscard]] std::string to_string(uint8_t time) const override {
-        return std::format("Следующий лод будет в {} часа на {} канале", time, events.at(time)[0]);
+        std::time_t now = std::time(nullptr);
+        std::tm* current_time = std::gmtime(&now);
+        current_time->tm_hour += 2;
+        std::mktime(current_time);
+
+        std::tm event_time = *current_time;
+        event_time.tm_hour = time;
+        event_time.tm_min = 0;
+        event_time.tm_sec = 0;
+        const std::time_t event_time_t = std::mktime(&event_time);
+
+        auto remaining_time = std::chrono::seconds(event_time_t - std::mktime(current_time));
+
+        std::tm* msk_time = std::gmtime(&event_time_t);
+        msk_time->tm_hour += 3;
+        std::mktime(msk_time);
+
+        std::cout << "Event time (MSK): " << std::put_time(msk_time, "%Y-%m-%d %H:%M:%S") << std::endl;
+
+        auto hours = std::chrono::duration_cast<std::chrono::hours>(remaining_time);
+        remaining_time -= hours;
+        auto minutes = std::chrono::duration_cast<std::chrono::minutes>(remaining_time);
+        remaining_time -= minutes;
+        auto seconds = std::chrono::duration_cast<std::chrono::seconds>(remaining_time);
+
+        std::cout << "Remaining time: " << hours.count() << " hours, "
+                  << minutes.count() << " minutes, " << seconds.count() << " seconds."
+                  << std::endl;
+
+        return std::format("Следующий лод будет в {} часа на {} канале. Осталось ", time, events.at(time)[0]);
     }
 
 public:

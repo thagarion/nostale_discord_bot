@@ -33,16 +33,9 @@ public:
             if (event.first.as<std::string>() == "lod") {
                 Schedule lods;
                 for (const auto &entry: event.second) {
-                    auto channels_str = entry["channel"].as<std::string>();
-                    std::stringstream ss(channels_str);
-                    std::string channel;
-                    while (std::getline(ss, channel, ',')) {
-                        channel.erase(std::ranges::remove_if(channel, ::isspace).begin(), channel.end());
-                        lods[entry["time"].as<uint8_t>()].push_back(std::stoi(channel));
-                    }
+                    lods[entry["time"].as<int>()] = entry["channels"].as<std::vector<int>>();
                 }
-                auto lod_entry = std::make_shared<LandOfDeathEvent>(lods);
-                events["lod"] = lod_entry;
+                events["lod"] = std::make_shared<LandOfDeathEvent>(lods);
             }
         }
     }

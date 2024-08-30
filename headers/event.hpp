@@ -63,7 +63,13 @@ public:
     [[nodiscard]] virtual std::string get_next() const {
         const std::time_t now = std::time(nullptr);
         const std::tm *current_time = std::gmtime(&now);
-        const auto server_hour = current_time->tm_hour + 2;
+
+        int offset_hours = 1;
+        if (current_time->tm_mon >= 2 && current_time->tm_mon <= 9) {
+            offset_hours = 2; // CEST is UTC+2
+        }
+
+        const auto server_hour = current_time->tm_hour + offset_hours;
         for (const auto &hour: std::views::keys(events)) {
             if (hour > server_hour) {
                 return to_string(hour);

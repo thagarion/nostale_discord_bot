@@ -1,37 +1,121 @@
+ic:
+  - time: 0:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 2:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 4:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 6:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 8:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 10:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 12:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 14:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 16:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 18:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 20:00
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 22:00
+    channels:
+      - 1
+      - 2
+      - 3
+
+aic:
+  - time: 11:30
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 17:30
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 21:30
+    channels:
+      - 1
+      - 2
+      - 3
+  - time: 23:30
+    channels:
+      - 1
+      - 2
+      - 3
+
 lod:
-  - time: 0
+  - time: 0:00
     channels:
       - 7
-  - time: 3
+  - time: 3:00
     channels:
       - 1
-  - time: 6
+  - time: 6:00
     channels:
       - 1
-  - time: 9
+  - time: 9:00
     channels:
       - 2
-  - time: 12
+  - time: 12:00
     channels:
       - 3
-  - time: 15
+  - time: 15:00
     channels:
       - 2
       - 3
       - 6
-  - time: 18
+  - time: 18:00
     channels:
       - 4
       - 5
       - 7
-  - time: 21
+  - time: 21:00
     channels:
       - 4
       - 5
       - 6
 
 lol:
-  - time: 0
+  - time: 0:00
     channels:
       - 1
       - 2
@@ -40,7 +124,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 2
+  - time: 2:00
     channels:
       - 1
       - 2
@@ -49,7 +133,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 4
+  - time: 4:00
     channels:
       - 1
       - 2
@@ -58,7 +142,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 6
+  - time: 6:00
     channels:
       - 1
       - 2
@@ -67,7 +151,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 8
+  - time: 8:00
     channels:
       - 1
       - 2
@@ -76,7 +160,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 10
+  - time: 10:00
     channels:
       - 1
       - 2
@@ -85,7 +169,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 12
+  - time: 12:00
     channels:
       - 1
       - 2
@@ -94,7 +178,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 14
+  - time: 14:00
     channels:
       - 1
       - 2
@@ -103,7 +187,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 16
+  - time: 16:00
     channels:
       - 1
       - 2
@@ -112,7 +196,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 18
+  - time: 18:00
     channels:
       - 1
       - 2
@@ -121,7 +205,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 20
+  - time: 20:00
     channels:
       - 1
       - 2
@@ -130,7 +214,7 @@ lol:
       - 5
       - 6
       - 7
-  - time: 22
+  - time: 22:00
     channels:
       - 1
       - 2

@@ -53,3 +53,11 @@ protected:
 public:
     explicit LandOfLifeEvent(Schedule times) : Event(std::move(times)) {}
 };
+
+class InstantCombatEvent final : public  Event {
+protected:
+    [[nodiscard]] std::string to_string(const std::tm& time) const override;
+
+public:
+    explicit InstantCombatEvent(Schedule times) : Event(std::move(times)) {}
+};

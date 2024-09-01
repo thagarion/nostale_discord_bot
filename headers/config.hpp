@@ -31,6 +31,16 @@ public:
         mara_channel = get_value<uint64_t>(config, "mara_channel_id");
 
         for (const YAML::Node events_node = YAML::LoadFile(path + "/events.yaml"); const auto& event : events_node) {
+            if (event.first.as<std::string>() == "ic") {
+                Schedule ics;
+                for (const auto& entry : event.second) {
+                    std::istringstream ss(entry["time"].as<std::string>());
+                    std::tm time = {};
+                    ss >> std::get_time(&time, "%H:%M");
+                    ics[time] = entry["channels"].as<std::vector<int>>();
+                }
+                events["ic"] = std::make_shared<InstantCombatEvent>(ics);
+            }
             if (event.first.as<std::string>() == "lod") {
                 Schedule lods;
                 for (const auto& entry : event.second) {
@@ -59,6 +69,8 @@ public:
     [[nodiscard]] uint64_t get_guild_id() const { return guild; }
 
     [[nodiscard]] uint64_t get_mara_channel_id() const { return mara_channel; }
+
+    [[nodiscard]] std::string get_next_ic() const { return events.at("ic")->get_next(); }
 
     [[nodiscard]] std::string get_next_lod() const { return events.at("lod")->get_next(); }
 

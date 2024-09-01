@@ -24,7 +24,7 @@ std::string LandOfDeathEvent::to_string(const std::tm& time) const {
 
     const auto dark_horn_remaining_time = remaining_time + std::chrono::hours(1);
 
-    return std::format("Следующий ЛоД будет в {} ({})\nДХ в {} ({})\nКаналы: {}\n", time_to_string(msk_time),
+    return std::format("Следующий ЛоД будет в {} ({})\nДХ в {} ({})\nКаналы: {}", time_to_string(msk_time),
                        remaining_time_to_string(remaining_time), time_to_string(dark_horn_time),
                        remaining_time_to_string(dark_horn_remaining_time), channels_to_string(events.at(time)));
 }

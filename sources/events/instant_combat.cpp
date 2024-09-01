@@ -1,6 +1,6 @@
-#include "event.hpp"
+#include <event.hpp>
 
-std::string LandOfLifeEvent::to_string(const std::tm& time) const {
+std::string InstantCombatEvent::to_string(const std::tm& time) const {
     const std::time_t now = std::time(nullptr);
     std::tm* current_time = std::gmtime(&now);
     current_time->tm_hour += 2;
@@ -19,12 +19,6 @@ std::string LandOfLifeEvent::to_string(const std::tm& time) const {
     std::tm msk_time = event_time;
     msk_time.tm_hour += 1;
 
-    std::tm asgobas_time = msk_time;
-    asgobas_time.tm_hour += 1;
-
-    const auto dark_horn_remaining_time = remaining_time + std::chrono::hours(1);
-
-    return std::format("Следующий ЛоЛ будет в {} ({})\nАсго в {} ({})\nКаналы: {}", time_to_string(msk_time),
-                       remaining_time_to_string(remaining_time), time_to_string(asgobas_time),
-                       remaining_time_to_string(dark_horn_remaining_time), channels_to_string(events.at(time)));
+    return std::format("Следующая ББ будет в {} ({})\nКаналы: {}", time_to_string(msk_time),
+                       remaining_time_to_string(remaining_time), channels_to_string(events.at(time)));
 }

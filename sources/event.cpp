@@ -1,5 +1,6 @@
 #include "event.hpp"
 
+#include <iostream>
 #include <ranges>
 
 std::string Event::get_plural_form(const long value, const std::string& one, const std::string& few,
@@ -48,10 +49,8 @@ std::string Event::get_next() const {
         current_time->tm_hour += 1;
     }
 
-    const auto current_time_t = std::mktime(current_time);
-
-    for (auto time : std::views::keys(events)) {
-        if (std::mktime(&time) > current_time_t) {
+    for (const auto& time : std::views::keys(events)) {
+        if (time > *current_time) {
             return to_string(time);
         }
     }

@@ -6,10 +6,16 @@
 #include <utility>
 
 inline bool operator<(const std::tm& lhs, const std::tm& rhs) {
-    if (lhs.tm_mday < rhs.tm_mday) return true;
     if (lhs.tm_hour < rhs.tm_hour) return true;
     if (lhs.tm_min < rhs.tm_min) return true;
     if (lhs.tm_sec < rhs.tm_sec) return true;
+    return false;
+}
+
+inline bool operator>(const std::tm& lhs, const std::tm& rhs) {
+    if (lhs.tm_hour > rhs.tm_hour) return true;
+    if (lhs.tm_min > rhs.tm_min) return true;
+    if (lhs.tm_sec > rhs.tm_sec) return true;
     return false;
 }
 
@@ -54,7 +60,7 @@ public:
     explicit LandOfLifeEvent(Schedule times) : Event(std::move(times)) {}
 };
 
-class InstantCombatEvent final : public  Event {
+class InstantCombatEvent final : public Event {
 protected:
     [[nodiscard]] std::string to_string(const std::tm& time) const override;
 

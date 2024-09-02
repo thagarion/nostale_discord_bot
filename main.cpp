@@ -13,6 +13,7 @@ int main(int argc, char* argv[]) {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_command_create(dpp::slashcommand("ping", "Проверка", bot.me.id));
             bot.global_command_create(dpp::slashcommand("ic", "Узнать время ББ", bot.me.id));
+            bot.global_command_create(dpp::slashcommand("asgo", "Узнать время Асго ББ", bot.me.id));
             bot.global_command_create(dpp::slashcommand("lod", "Узнать время ЛоДа", bot.me.id));
             bot.global_command_create(dpp::slashcommand("lol", "Узнать время ЛоЛа", bot.me.id));
             bot.global_command_create(dpp::slashcommand("change_name", "Изменить имя на сервере", bot.me.id)
@@ -28,6 +29,9 @@ int main(int argc, char* argv[]) {
         }
         if (event.command.get_command_name() == "ic") {
             event.reply(config.get_next_ic());
+        }
+        if (event.command.get_command_name() == "asgo") {
+            event.reply(config.get_next_aic());
         }
         if (event.command.get_command_name() == "lod") {
             event.reply(config.get_next_lod());

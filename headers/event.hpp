@@ -3,6 +3,7 @@
 #include <chrono>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 inline bool operator<(const std::tm& lhs, const std::tm& rhs) {
@@ -20,6 +21,11 @@ inline bool operator>(const std::tm& lhs, const std::tm& rhs) {
 }
 
 typedef std::map<std::tm, std::vector<int> > Schedule;
+
+enum EventType { INSTANT_COMBAT, ASGOBAS_INSTANT_COMBAT, LAND_OF_DEATH, LAND_OF_LIFE };
+
+const std::unordered_map<EventType, std::string> EventTypeString = {
+    {INSTANT_COMBAT, "ic"}, {ASGOBAS_INSTANT_COMBAT, "asgo"}, {LAND_OF_DEATH, "lod"}, {LAND_OF_LIFE, "lol"}};
 
 class Event {
     [[nodiscard]] static std::string get_plural_form(long value, const std::string& one, const std::string& few,
@@ -66,4 +72,12 @@ protected:
 
 public:
     explicit InstantCombatEvent(Schedule times) : Event(std::move(times)) {}
+};
+
+class AsgobasInstantCombatEvent final : public Event {
+protected:
+    [[nodiscard]] std::string to_string(const std::tm& time) const override;
+
+public:
+    explicit AsgobasInstantCombatEvent(Schedule times) : Event(std::move(times)) {}
 };

@@ -53,13 +53,28 @@ int main(int argc, char* argv[]) {
             event.reply(nickname + " теперь известен как " + guild.members.find(user_id)->second.get_mention());
         }
         if (event.command.get_command_name() == "mara") {
-            if (event.command.get_channel().id == dpp::snowflake(config.get_mara_channel_id())) {
-                event.reply("Это правильный канал");
-            } else {
+            if (event.command.get_channel().id != dpp::snowflake(config.get_mara_channel_id())) {
                 event.reply("Эту команду можно использовать только в " +
-                            dpp::find_channel(dpp::snowflake(config.get_mara_channel_id()))->get_mention());
+                            find_channel(dpp::snowflake(config.get_mara_channel_id()))->get_mention());
+                return;
             }
+            dpp::message msg(event.command.channel_id, "this text has a button");
+            msg.add_component(dpp::component().add_component(dpp::component()
+                                                                 .set_label("Click me!")
+                                                                 .set_type(dpp::cot_button)
+                                                                 .set_style(dpp::cos_primary)
+                                                                 .set_id("myid")));
+
+            /* Reply to the user with our message. */
+            event.reply(msg);
         }
+    });
+
+    bot.on_button_click([](const dpp::button_click_t& event) {
+        /* Button clicks are still interactions, and must be replied to in some form to
+         * prevent the "this interaction has failed" message from Discord to the user.
+         */
+        event.reply(dpp::ir_update_message,"You clicked: " + event.custom_id);
     });
 
     bot.start(dpp::st_wait);

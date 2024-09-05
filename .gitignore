@@ -1,2 +1,4 @@
-configs/config.yaml
+.idea
 cmake*
+
+configs/config.yaml

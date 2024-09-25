@@ -1,23 +1,22 @@
 #include <dpp/dpp.h>
 
 #include "config.hpp"
+#include "enums.hpp"
 
 int main(int argc, char* argv[]) {
     const Config config(argv[1]);
 
-    dpp::cluster bot(config.get_bot_token());
+    dpp::cluster bot(config.get_bot_token(),  dpp::i_default_intents | dpp::i_message_content | dpp::i_all_intents);
 
     bot.on_log(dpp::utility::cout_logger());
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(dpp::slashcommand("ping", "Проверка", bot.me.id));
-            bot.global_command_create(dpp::slashcommand("ic", "Узнать время ББ", bot.me.id));
-            bot.global_command_create(dpp::slashcommand("asgo", "Узнать время Асго ББ", bot.me.id));
-            bot.global_command_create(dpp::slashcommand("lod", "Узнать время ЛоДа", bot.me.id));
-            bot.global_command_create(dpp::slashcommand("lol", "Узнать время ЛоЛа", bot.me.id));
-            bot.global_command_create(dpp::slashcommand("change_name", "Изменить имя на сервере", bot.me.id)
-                                          .add_option(dpp::command_option(dpp::co_string, "name", "Новое имя")));
+            bot.global_command_create(dpp::slashcommand(PING_COMMAND, "Проверка", bot.me.id));
+            bot.global_command_create(
+                dpp::slashcommand(TIME_COMMAND, "Узнать время следующего ивента", bot.me.id)
+                    .add_option(
+                        dpp::command_option(dpp::co_string, "event", "Название ивента").set_auto_complete(true)));
             bot.global_command_create(dpp::slashcommand("mara", "Начать марафон", bot.me.id)
                                           .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
         }
@@ -27,30 +26,20 @@ int main(int argc, char* argv[]) {
         if (event.command.get_command_name() == "ping") {
             event.reply("Я тут");
         }
-        if (event.command.get_command_name() == "ic") {
-            event.reply(config.get_next_ic());
-        }
-        if (event.command.get_command_name() == "asgo") {
-            event.reply(config.get_next_aic());
-        }
-        if (event.command.get_command_name() == "lod") {
-            event.reply(config.get_next_lod());
-        }
-        if (event.command.get_command_name() == "lol") {
-            event.reply(config.get_next_lol());
-        }
-        if (event.command.get_command_name() == "change_name") {
-            if (const dpp::permission permission = event.command.get_resolved_permission(event.command.usr.id);
-                !permission.can(dpp::p_change_nickname)) {
-                event.reply("You don't have the required permissions to change nickname!");
-                return;
+        if (event.command.get_command_name() == "time") {
+            const auto event_name = std::get<std::string>(event.get_parameter("event"));
+            if (event_name == IC_EVENT) {
+                event.reply(config.get_next_ic());
+            } else if (event_name == AIC_EVENT) {
+                event.reply(config.get_next_aic());
+            } else if (event_name == LOD_EVENT) {
+                event.reply(config.get_next_lod());
+            } else if (event_name == LOL_EVENT) {
+                event.reply(config.get_next_lol());
+            } else {
+                event.reply(
+                    dpp::message(std::format("Недопустимый параметр [{}]", event_name)).set_flags(dpp::m_ephemeral));
             }
-            const std::string new_name = std::get<std::string>(event.get_parameter("name"));
-            const dpp::snowflake user_id = event.command.get_issuing_user().id;
-            const std::string nickname = event.command.get_guild().members.at(user_id).get_nickname();
-            dpp::guild guild = event.command.get_guild();
-            guild.members.find(user_id)->second.set_nickname(new_name);
-            event.reply(nickname + " теперь известен как " + guild.members.find(user_id)->second.get_mention());
         }
         if (event.command.get_command_name() == "mara") {
             if (event.command.get_channel().id != dpp::snowflake(config.get_mara_channel_id())) {
@@ -65,16 +54,54 @@ int main(int argc, char* argv[]) {
                                                                  .set_style(dpp::cos_primary)
                                                                  .set_id("myid")));
 
-            /* Reply to the user with our message. */
             event.reply(msg);
         }
     });
 
+    bot.on_autocomplete([&bot](const dpp::autocomplete_t& event) {
+        for (auto& opt : event.options) {
+            if (opt.focused) {
+                if (event.name == TIME_COMMAND) {
+                    const auto user_value = std::get<std::string>(opt.value);
+                    bot.interaction_response_create(event.command.id, event.command.token,
+                                                    dpp::interaction_response(dpp::ir_autocomplete_reply)
+                                                        .add_autocomplete_choice(dpp::command_option_choice(
+                                                            "instant combat", std::string(IC_EVENT)))
+                                                        .add_autocomplete_choice(dpp::command_option_choice(
+                                                            "asgobas instant combat", std::string(AIC_EVENT)))
+                                                        .add_autocomplete_choice(dpp::command_option_choice(
+                                                            "land of death", std::string(LOD_EVENT)))
+                                                        .add_autocomplete_choice(dpp::command_option_choice(
+                                                            "land of life", std::string(LOL_EVENT))));
+                    break;
+                }
+            }
+        }
+    });
+
     bot.on_button_click([](const dpp::button_click_t& event) {
-        /* Button clicks are still interactions, and must be replied to in some form to
-         * prevent the "this interaction has failed" message from Discord to the user.
-         */
-        event.reply(dpp::ir_update_message,"You clicked: " + event.custom_id);
+        event.reply(dpp::ir_update_message, "You clicked: " + event.custom_id);
+    });
+
+    bot.on_guild_member_update([&bot](const dpp::guild_member_update_t& update) {
+        const auto name = update.updated.get_nickname();
+
+        const auto start = name.find_first_of('[');
+        const auto end = name.find_last_of(']');
+        if (start == std::string::npos || end == std::string::npos) {
+            bot.log(dpp::ll_error, std::format("Can not parse levels [{}]", name));
+            return;
+        }
+        auto levels_string = name.substr(start + 1, end - 1);
+        if (levels_string.at(0) == 'C') {
+            levels_string = levels_string.substr(levels_string.front() + 1, levels_string.back());
+            for (auto i = levels_string.find_first_of('/'); i != std::string::npos;
+                 i = levels_string.find_first_of('/')) {
+                bot.log(dpp::ll_debug, "got number = " + levels_string.substr(0, i - 1));
+                levels_string = levels_string.substr(i, levels_string.size());
+            }
+            bot.log(dpp::ll_debug, "got number = " + levels_string);
+        }
     });
 
     bot.start(dpp::st_wait);

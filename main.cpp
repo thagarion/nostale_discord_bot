@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) {
     const Config config(argv[1]);
 
-    dpp::cluster bot(config.get_bot_token(),  dpp::i_default_intents | dpp::i_message_content | dpp::i_all_intents);
+    dpp::cluster bot(config.get_bot_token(), dpp::i_default_intents | dpp::i_message_content | dpp::i_all_intents);
 
     bot.on_log(dpp::utility::cout_logger());
 
@@ -84,24 +84,6 @@ int main(int argc, char* argv[]) {
     });
 
     bot.on_guild_member_update([&bot](const dpp::guild_member_update_t& update) {
-        const auto name = update.updated.get_nickname();
-
-        const auto start = name.find_first_of('[');
-        const auto end = name.find_last_of(']');
-        if (start == std::string::npos || end == std::string::npos) {
-            bot.log(dpp::ll_error, std::format("Can not parse levels [{}]", name));
-            return;
-        }
-        auto levels_string = name.substr(start + 1, end - 1);
-        if (levels_string.at(0) == 'C') {
-            levels_string = levels_string.substr(levels_string.front() + 1, levels_string.back());
-            for (auto i = levels_string.find_first_of('/'); i != std::string::npos;
-                 i = levels_string.find_first_of('/')) {
-                bot.log(dpp::ll_debug, "got number = " + levels_string.substr(0, i - 1));
-                levels_string = levels_string.substr(i, levels_string.size());
-            }
-            bot.log(dpp::ll_debug, "got number = " + levels_string);
-        }
     });
 
     bot.start(dpp::st_wait);

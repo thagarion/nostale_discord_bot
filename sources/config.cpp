@@ -1,10 +1,15 @@
-#include "config.hpp"
+#include "configs/config.hpp"
 
-Config::Config(const std::string& path) {
-    const YAML::Node config = YAML::LoadFile(path + "/config.yaml");
-    token = get_value<std::string>(config, "token");
-    guild = get_value<uint64_t>(config, "guild_id");
-    mara_channel = get_value<uint64_t>(config, "mara_channel_id");
+#include <fstream>
+
+#include "bot.hpp"
+
+Config::Config(const std::string& path) : config_path(path) {
+    for (const YAML::Node config_node = YAML::LoadFile(path + "/config.yaml"); const auto& config_entry : config_node) {
+        auto guild_id = config_entry.first.as<uint64_t>();
+        auto entry = config_entry.second.as<ConfigEntry>();
+        settings[guild_id] = entry;
+    }
 
     for (const YAML::Node events_node = YAML::LoadFile(path + "/events.yaml"); const auto& event : events_node) {
         if (event.first.as<std::string>() == "ic") {
@@ -55,4 +60,35 @@ Config::Config(const std::string& path) {
             throw std::runtime_error(error_string);
         }
     }
+}
+
+void Config::set_value(const uint64_t guild_id, const std::string& key, const std::string& value) {
+    if (!settings.contains(guild_id)) {
+        settings[guild_id] = ConfigEntry();
+    }
+    if (key == MARA_CONF) {
+        settings[guild_id].mara_channel_id = strtoull(value.c_str(), nullptr, 10);
+    } else if (key == NEWS_CONF) {
+        settings[guild_id].news_channel_id = strtoull(value.c_str(), nullptr, 10);
+    }
+
+    save();
+}
+
+void Config::save() const {
+    const auto file_name = config_path + "/config.yaml";
+
+    std::ofstream config_file(file_name, std::ios::out | std::ios::trunc);
+    if (!config_file) {
+        Bot::Log(log_level::ll_error, "Cannot open file for writing " + file_name);
+        return;
+    }
+
+    YAML::Node node;
+    for (auto& [key, value] : settings) {
+        node[key] = value;
+    }
+
+    config_file << node;
+    config_file.close();
 }

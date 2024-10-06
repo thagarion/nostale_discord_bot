@@ -9,7 +9,9 @@ void Bot::Init() {
     bot_ptr->on_ready(on_ready);
     bot_ptr->on_slashcommand(on_slashcommand);
     bot_ptr->on_autocomplete(on_autocomplete);
-    bot_ptr->on_guild_member_update(on_guild_member_update);
+
+    // TODO set roles depends username
+    // bot_ptr->on_guild_member_update(on_guild_member_update);
 
     bot_ptr->start(dpp::st_wait);
 }
@@ -19,19 +21,35 @@ void Bot::Log(const log_level level, const std::string& message) { bot_ptr->log(
 void Bot::on_ready(const dpp::ready_t& event) {
     if (dpp::run_once<struct register_bot_commands>()) {
         bot_ptr->global_command_create(dpp::slashcommand(PING_COMMAND, "Проверка", bot_ptr->me.id));
+        bot_ptr->global_command_create(dpp::slashcommand(CONF_COMMAND, "Настройки", bot_ptr->me.id)
+                                           .add_option(dpp::command_option(dpp::co_string, "key", "Имя"))
+                                           .add_option(dpp::command_option(dpp::co_string, "value", "Значение")));
         bot_ptr->global_command_create(
             dpp::slashcommand(TIME_COMMAND, "Узнать время следующего ивента", bot_ptr->me.id)
                 .add_option(dpp::command_option(dpp::co_string, "event", "Название ивента").set_auto_complete(true)));
-        bot_ptr->global_command_create(dpp::slashcommand("mara", "Начать марафон", bot_ptr->me.id)
-                                           .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
+
+        // TODO mara channel
+        // bot_ptr->global_command_create(dpp::slashcommand("mara", "Начать марафон", bot_ptr->me.id)
+        //                                    .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
     }
 }
 
 void Bot::on_slashcommand(const dpp::slashcommand_t& event) {
-    if (event.command.get_command_name() == "ping") {
+    if (event.command.get_command_name() == PING_COMMAND) {
         event.reply("Я тут");
     }
-    if (event.command.get_command_name() == "time") {
+    if (event.command.get_command_name() == CONF_COMMAND) {
+        const auto key = std::get<std::string>(event.get_parameter("key"));
+        const auto value = std::get<std::string>(event.get_parameter("value"));
+        if (event.command.get_issuing_user() == event.command.get_guild().owner_id) {
+            config.set_value(event.command.guild_id, key, value);
+            event.reply(dpp::message(std::format("OK")).set_flags(dpp::m_ephemeral));
+        } else {
+            event.reply(dpp::message(std::format("Эту команду может использовать только владелец сервера"))
+                            .set_flags(dpp::m_ephemeral));
+        }
+    }
+    if (event.command.get_command_name() == TIME_COMMAND) {
         const auto event_name = std::get<std::string>(event.get_parameter("event"));
         if (event_name == IC_EVENT) {
             event.reply(config.get_next_ic());
@@ -46,21 +64,17 @@ void Bot::on_slashcommand(const dpp::slashcommand_t& event) {
                 dpp::message(std::format("Недопустимый параметр [{}]", event_name)).set_flags(dpp::m_ephemeral));
         }
     }
-    if (event.command.get_command_name() == "mara") {
-        if (event.command.get_channel().id != dpp::snowflake(config.get_mara_channel_id())) {
-            event.reply("Эту команду можно использовать только в " +
-                        find_channel(dpp::snowflake(config.get_mara_channel_id()))->get_mention());
-            return;
-        }
-        dpp::message msg(event.command.channel_id, "this text has a button");
-        msg.add_component(dpp::component().add_component(dpp::component()
-                                                             .set_label("Click me!")
-                                                             .set_type(dpp::cot_button)
-                                                             .set_style(dpp::cos_primary)
-                                                             .set_id("myid")));
-
-        event.reply(msg);
-    }
+    // TODO mara channel
+    // if (event.command.get_command_name() == "mara") {
+    //     dpp::message msg(event.command.channel_id, "this text has a button");
+    //     msg.add_component(dpp::component().add_component(dpp::component()
+    //                                                          .set_label("Click me!")
+    //                                                          .set_type(dpp::cot_button)
+    //                                                          .set_style(dpp::cos_primary)
+    //                                                          .set_id("myid")));
+    //
+    //     event.reply(msg);
+    // }
 }
 
 void Bot::on_autocomplete(const dpp::autocomplete_t& event) {

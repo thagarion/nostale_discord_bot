@@ -2,7 +2,7 @@
 
 #include <dpp/dpp.h>
 
-#include "config.hpp"
+#include "configs/config.hpp"
 
 #ifndef BOT_TOKEN
 #error "[BOT_TOKEN] not defined"

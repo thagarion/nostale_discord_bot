@@ -4,16 +4,19 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 
+#include "configs/config_entry.hpp"
+#include "enums.hpp"
 #include "events.hpp"
 
 typedef std::shared_ptr<Event> EventPtr;
 
 class Config {
-    std::string token;
-    uint64_t guild;
-    uint64_t mara_channel;
+    std::unordered_map<uint64_t, ConfigEntry> settings;
+    std::unordered_map<EventType, EventPtr> events;
 
-    std::map<EventType, EventPtr> events;
+    const std::string config_path;
+
+    void save() const;
 
     template <typename T>
     [[nodiscard]] static T get_value(YAML::Node config, const std::string& field) {
@@ -27,11 +30,21 @@ class Config {
 public:
     explicit Config(const std::string& path);
 
-    [[nodiscard]] std::string get_bot_token() const { return token; }
+    void set_value(uint64_t guild_id, const std::string& key, const std::string& value);
 
-    [[nodiscard]] uint64_t get_guild_id() const { return guild; }
+    [[nodiscard]] uint64_t get_mara_channel_id(const uint64_t guild_id) const {
+        if (settings.contains(guild_id)) {
+            return settings.at(guild_id).mara_channel_id;
+        }
+        return 0;
+    }
 
-    [[nodiscard]] uint64_t get_mara_channel_id() const { return mara_channel; }
+    [[nodiscard]] uint64_t get_news_channel_id(const uint64_t guild_id) const {
+        if (settings.contains(guild_id)) {
+            return settings.at(guild_id).news_channel_id;
+        }
+        return 0;
+    }
 
     [[nodiscard]] std::string get_next_ic() const { return events.at(INSTANT_COMBAT)->get_next(); }
 

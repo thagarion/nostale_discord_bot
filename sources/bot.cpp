@@ -22,11 +22,15 @@ void Bot::on_ready(const dpp::ready_t& event) {
     if (dpp::run_once<struct register_bot_commands>()) {
         bot_ptr->global_command_create(dpp::slashcommand(PING_COMMAND, "Проверка", bot_ptr->me.id));
         bot_ptr->global_command_create(dpp::slashcommand(CONF_COMMAND, "Настройки", bot_ptr->me.id)
-                                           .add_option(dpp::command_option(dpp::co_string, "key", "Имя"))
-                                           .add_option(dpp::command_option(dpp::co_string, "value", "Значение")));
+                                           .add_option(dpp::command_option(dpp::co_string, "key", "Имя", true))
+                                           .add_option(dpp::command_option(dpp::co_string, "value", "Значение", true)));
         bot_ptr->global_command_create(
             dpp::slashcommand(TIME_COMMAND, "Узнать время следующего ивента", bot_ptr->me.id)
-                .add_option(dpp::command_option(dpp::co_string, "event", "Название ивента").set_auto_complete(true)));
+                .add_option(dpp::command_option(dpp::co_string, "event", "Название ивента", true)
+                                .add_choice(dpp::command_option_choice("Instant Combat", IC_EVENT))
+                                .add_choice(dpp::command_option_choice("Asgobas' Instant Combat", AIC_EVENT))
+                                .add_choice(dpp::command_option_choice("Land Of Death", LOD_EVENT))
+                                .add_choice(dpp::command_option_choice("Land Of Life", LOL_EVENT))));
 
         // TODO mara channel
         // bot_ptr->global_command_create(dpp::slashcommand("mara", "Начать марафон", bot_ptr->me.id)

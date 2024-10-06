@@ -47,6 +47,9 @@ std::string Event::get_next() const {
     current_time->tm_hour += 1;
     if (current_time->tm_mon >= 2 && current_time->tm_mon <= 9) {
         current_time->tm_hour += 1;
+        if (current_time->tm_hour >= 24) {
+            current_time->tm_hour -= 24;
+        }
     }
 
     for (const auto& time : std::views::keys(events)) {

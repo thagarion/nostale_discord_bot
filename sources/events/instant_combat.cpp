@@ -1,4 +1,4 @@
-#include <event.hpp>
+#include <events.hpp>
 
 std::string InstantCombatEvent::to_string(const std::tm& time) const {
     const std::time_t now = std::time(nullptr);

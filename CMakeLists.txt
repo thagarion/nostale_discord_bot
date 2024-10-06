@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(nostale_discord_bot VERSION 1.0 DESCRIPTION "A discord bot")
 
-file(GLOB_RECURSE sources "sources/**.cpp")
-file(GLOB_RECURSE headers "headers/**.hpp")
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 include(FetchContent)
 FetchContent_Declare(
         dpp
@@ -14,6 +8,14 @@ FetchContent_Declare(
         GIT_TAG v10.0.30
 )
 FetchContent_MakeAvailable(dpp)
+
+file(GLOB_RECURSE sources "sources/**.cpp")
+file(GLOB_RECURSE headers "headers/**.hpp")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_definitions(-DBOT_TOKEN=${BOT_TOKEN})
 
 include_directories(${project_name} PUBLIC headers ${DPP_INCLUDE_DIR})
 

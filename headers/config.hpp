@@ -4,7 +4,7 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 
-#include "event.hpp"
+#include "events.hpp"
 
 typedef std::shared_ptr<Event> EventPtr;
 

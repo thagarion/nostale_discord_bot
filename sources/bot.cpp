@@ -5,7 +5,7 @@
 void Bot::Init() {
     bot_ptr = std::make_unique<dpp::cluster>(BOT_TOKEN);
 
-    bot_ptr->on_log(dpp::utility::cout_logger());
+    bot_ptr->on_log(on_log);
     bot_ptr->on_ready(on_ready);
     bot_ptr->on_slashcommand(on_slashcommand);
     bot_ptr->on_autocomplete(on_autocomplete);
@@ -17,6 +17,13 @@ void Bot::Init() {
 }
 
 void Bot::Log(const log_level level, const std::string& message) { bot_ptr->log(level, message); }
+
+void Bot::on_log(const dpp::log_t& log) {
+    if (log.severity > dpp::ll_trace) {
+        logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
+                               log.message));
+    }
+}
 
 void Bot::on_ready(const dpp::ready_t& event) {
     if (dpp::run_once<struct register_bot_commands>()) {

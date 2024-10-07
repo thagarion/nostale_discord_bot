@@ -6,7 +6,7 @@
 
 #include "configs/config_entry.hpp"
 #include "enums.hpp"
-#include "events.hpp"
+#include "events/event.hpp"
 
 typedef std::shared_ptr<Event> EventPtr;
 

@@ -1,4 +1,6 @@
 .idea
 cmake*
+logs
 
 configs/config.yaml
+*.log

@@ -1,4 +1,4 @@
-#include "events.hpp"
+#include "events/event.hpp"
 
 std::string LandOfDeathEvent::to_string(const std::tm& time) const {
     const std::time_t now = std::time(nullptr);

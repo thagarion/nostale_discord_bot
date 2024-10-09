@@ -12,6 +12,7 @@ typedef std::shared_ptr<Event> EventPtr;
 
 class Config {
     std::unordered_map<uint64_t, ConfigEntry> settings;
+    std::vector<uint64_t> news_channels;
     std::unordered_map<EventType, EventPtr> events;
 
     const std::string config_path;
@@ -39,11 +40,8 @@ public:
         return 0;
     }
 
-    [[nodiscard]] uint64_t get_news_channel_id(const uint64_t guild_id) const {
-        if (settings.contains(guild_id)) {
-            return settings.at(guild_id).news_channel_id;
-        }
-        return 0;
+    [[nodiscard]] const std::vector<uint64_t>* get_news_channels() const {
+        return &news_channels;
     }
 
     [[nodiscard]] std::string get_next_ic() const { return events.at(INSTANT_COMBAT)->get_next(); }

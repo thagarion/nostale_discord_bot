@@ -2,6 +2,7 @@
 #include <ranges>
 
 #include "events/event.hpp"
+#include "utils/time.hpp"
 
 std::string Event::get_plural_form(const long value, const std::string& one, const std::string& few,
                                    const std::string& many) {
@@ -41,16 +42,7 @@ std::string Event::remaining_time_to_string(std::chrono::seconds time) {
 }
 
 std::string Event::get_next() const {
-    const std::time_t now = std::time(nullptr);
-    std::tm* current_time = std::gmtime(&now);
-
-    current_time->tm_hour += 1;
-    if (current_time->tm_mon >= 2 && current_time->tm_mon <= 9) {
-        current_time->tm_hour += 1;
-        if (current_time->tm_hour >= 24) {
-            current_time->tm_hour -= 24;
-        }
-    }
+    const auto current_time = get_current_time_gmt_2();
 
     for (const auto& time : std::views::keys(events)) {
         if (time > *current_time) {

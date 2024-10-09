@@ -6,20 +6,6 @@
 #include <unordered_map>
 #include <utility>
 
-inline bool operator<(const std::tm& lhs, const std::tm& rhs) {
-    if (lhs.tm_hour < rhs.tm_hour) return true;
-    if (lhs.tm_min < rhs.tm_min) return true;
-    if (lhs.tm_sec < rhs.tm_sec) return true;
-    return false;
-}
-
-inline bool operator>(const std::tm& lhs, const std::tm& rhs) {
-    if (lhs.tm_hour > rhs.tm_hour) return true;
-    if (lhs.tm_min > rhs.tm_min) return true;
-    if (lhs.tm_sec > rhs.tm_sec) return true;
-    return false;
-}
-
 typedef std::map<std::tm, std::vector<int> > Schedule;
 
 enum EventType { INSTANT_COMBAT, ASGOBAS_INSTANT_COMBAT, LAND_OF_DEATH, LAND_OF_LIFE };

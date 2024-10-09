@@ -1,4 +1,5 @@
 #include "events/event.hpp"
+#include "utils/time.hpp"
 
 std::string AsgobasInstantCombatEvent::to_string(const std::tm& time) const {
     const std::time_t now = std::time(nullptr);

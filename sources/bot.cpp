@@ -1,6 +1,7 @@
 #include "bot.hpp"
 
 #include "enums.hpp"
+#include "rss_feed/rss_event.hpp"
 
 void Bot::Init() {
     bot_ptr = std::make_unique<dpp::cluster>(BOT_TOKEN);
@@ -16,13 +17,23 @@ void Bot::Init() {
     bot_ptr->start(dpp::st_wait);
 }
 
-void Bot::Log(const log_level level, const std::string& message) { bot_ptr->log(level, message); }
+void Bot::Log(const log_level level, const std::string& message) {
+    logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(level), message));
+}
+
+void Bot::SensNews(const RSSEvent& event) {
+    const auto channels = config.get_news_channels();
+    for (const uint64_t channel : *channels) {
+        for (auto &text : event.to_string()) {
+            bot_ptr->message_create(dpp::message(channel, text));
+            sleep(5);
+        }
+    }
+}
 
 void Bot::on_log(const dpp::log_t& log) {
-    if (log.severity > dpp::ll_trace) {
-        logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
-                               log.message));
-    }
+    logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
+                           log.message));
 }
 
 void Bot::on_ready(const dpp::ready_t& event) {

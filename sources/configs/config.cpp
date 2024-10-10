@@ -6,11 +6,14 @@
 #include "utils/time.hpp"
 
 Config::Config(const std::string& path) : config_path(path) {
-    for (const YAML::Node config_node = YAML::LoadFile(path + "/config.yaml"); const auto& config_entry : config_node) {
-        auto guild_id = config_entry.first.as<uint64_t>();
-        auto entry = config_entry.second.as<ConfigEntry>();
-        settings[guild_id] = entry;
-        news_channels.push_back(entry.news_channel_id);
+    if (std::filesystem::exists(path + "/config.yaml")) {
+        for (const YAML::Node config_node = YAML::LoadFile(path + "/config.yaml");
+             const auto& config_entry : config_node) {
+            auto guild_id = config_entry.first.as<uint64_t>();
+            auto entry = config_entry.second.as<ConfigEntry>();
+            settings[guild_id] = entry;
+            news_channels.push_back(entry.news_channel_id);
+        }
     }
 
     for (const YAML::Node events_node = YAML::LoadFile(path + "/events.yaml"); const auto& event : events_node) {
@@ -73,8 +76,8 @@ void Config::set_value(const uint64_t guild_id, const std::string& key, const st
     } else if (key == NEWS_CONF) {
         settings[guild_id].news_channel_id = strtoull(value.c_str(), nullptr, 10);
         news_channels.clear();
-        for (auto [key, value] : settings) {
-            news_channels.push_back(value.news_channel_id);
+        for (auto entry : std::views::values(settings)) {
+            news_channels.push_back(entry.news_channel_id);
         }
     }
 

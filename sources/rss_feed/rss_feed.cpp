@@ -50,12 +50,11 @@ void RSSFeed::parse(const std::string& data) {
 
     tinyxml2::XMLElement* item = channel->FirstChildElement("item");
 
-    auto current_time = get_current_date_time_gmt_2();
-
     while (item) {
         auto event = RSSEvent(item);
-        if (event.is_valid() && event.get_date_time() > *current_time) {
+        if (event.is_valid() && event.get_date_time() > last_event) {
             Bot::SensNews(event);
+            last_event = event.get_date_time();
         } else {
             break;
         }
@@ -66,10 +65,8 @@ void RSSFeed::parse(const std::string& data) {
 void RSSFeed::listen() {
     Bot::Log(dpp::ll_info, "Start RSS Feed");
 
-    const std::time_t now = std::time(nullptr);
-    const std::tm* now_tm = std::localtime(&now);
-
-    const int seconds_till_next_hour = (60 - now_tm->tm_min) * 60 - now_tm->tm_sec;
+    last_event = *get_current_date_time_gmt_2();
+    const int seconds_till_next_hour = (60 - last_event.tm_min) * 60 - last_event.tm_sec;
 
     std::this_thread::sleep_for(std::chrono::seconds(seconds_till_next_hour));
 

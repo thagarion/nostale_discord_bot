@@ -41,11 +41,25 @@ std::string Event::remaining_time_to_string(std::chrono::seconds time) {
                        seconds.count(), second_str);
 }
 
+std::string Event::past_time_to_string(std::chrono::seconds time) {
+    const auto hours = std::chrono::duration_cast<std::chrono::hours>(time);
+    time -= hours;
+    const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(time);
+    time -= minutes;
+    const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(time);
+
+    std::string hour_str = get_plural_form(hours.count(), "час", "часа", "часов");
+    std::string minute_str = get_plural_form(minutes.count(), "минута", "минуты", "минут");
+    std::string second_str = get_plural_form(seconds.count(), "секунда", "секунды", "секунд");
+    return std::format("{} {} {} {} {} {} назад", hours.count(), hour_str, minutes.count(), minute_str,
+                       seconds.count(), second_str);
+}
+
 std::string Event::get_next() const {
     const auto current_time = get_current_time_gmt_2();
 
     for (const auto& time : std::views::keys(events)) {
-        if (time > *current_time) {
+        if (time > current_time) {
             return to_string(time);
         }
     }

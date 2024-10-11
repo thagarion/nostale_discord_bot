@@ -30,7 +30,7 @@ inline std::tm* get_current_date_time_gmt_2() {
     return current_time;
 }
 
-inline std::tm* get_current_time_gmt_2() {
+inline std::tm get_current_time_gmt_2() {
     const std::time_t now = std::time(nullptr);
     std::tm* current_time = std::gmtime(&now);
 
@@ -46,5 +46,5 @@ inline std::tm* get_current_time_gmt_2() {
     current_time->tm_mon = 0;
     current_time->tm_mday = 0;
     
-    return current_time;
+    return *current_time;
 }

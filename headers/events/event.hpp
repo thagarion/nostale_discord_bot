@@ -27,6 +27,7 @@ protected:
     [[nodiscard]] static std::string time_to_string(const tm& time);
 
     [[nodiscard]] static std::string remaining_time_to_string(std::chrono::seconds time);
+    [[nodiscard]] static std::string past_time_to_string(std::chrono::seconds time);
 
 public:
     explicit Event(Schedule times) { events = std::move(times); }
@@ -39,17 +40,23 @@ public:
 class LandOfDeathEvent final : public Event {
 protected:
     [[nodiscard]] std::string to_string(const std::tm& time) const override;
+    [[nodiscard]] std::string to_string_current(const std::tm& time) const;
 
 public:
-    explicit LandOfDeathEvent(Schedule times) : Event(std::move(times)) {}
+    explicit LandOfDeathEvent(const Schedule& times) : Event(times) {}
+
+    [[nodiscard]] std::string get_next() const override;
 };
 
 class LandOfLifeEvent final : public Event {
 protected:
     [[nodiscard]] std::string to_string(const std::tm& time) const override;
+    [[nodiscard]] std::string to_string_current(const std::tm& time) const;
 
 public:
-    explicit LandOfLifeEvent(Schedule times) : Event(std::move(times)) {}
+    explicit LandOfLifeEvent(const Schedule& times) : Event(times) {}
+
+    [[nodiscard]] std::string get_next() const override;
 };
 
 class InstantCombatEvent final : public Event {
@@ -57,7 +64,7 @@ protected:
     [[nodiscard]] std::string to_string(const std::tm& time) const override;
 
 public:
-    explicit InstantCombatEvent(Schedule times) : Event(std::move(times)) {}
+    explicit InstantCombatEvent(const Schedule& times) : Event(times) {}
 };
 
 class AsgobasInstantCombatEvent final : public Event {
@@ -65,5 +72,5 @@ protected:
     [[nodiscard]] std::string to_string(const std::tm& time) const override;
 
 public:
-    explicit AsgobasInstantCombatEvent(Schedule times) : Event(std::move(times)) {}
+    explicit AsgobasInstantCombatEvent(const Schedule& times) : Event(times) {}
 };

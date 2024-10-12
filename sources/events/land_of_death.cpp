@@ -10,7 +10,7 @@ std::string LandOfDeathEvent::get_next() const {
         auto dark_horn_time = time;
         dark_horn_time.tm_hour += 1;
         if (dark_horn_time.tm_hour > 23) {
-            dark_horn_time.tm_hour -= 23;
+            dark_horn_time.tm_hour -= 24;
         }
         if (time > current_time || dark_horn_time > current_time) {
             return to_string(time);

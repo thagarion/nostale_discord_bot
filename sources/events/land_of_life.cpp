@@ -10,7 +10,7 @@ std::string LandOfLifeEvent::get_next() const {
         auto asgobas = time;
         asgobas.tm_hour += 1;
         if (asgobas.tm_hour > 23) {
-            asgobas.tm_hour -= 23;
+            asgobas.tm_hour -= 24;
         }
 
         if (time > current_time) {

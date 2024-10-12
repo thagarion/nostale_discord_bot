@@ -19,6 +19,9 @@ std::string AsgobasInstantCombatEvent::to_string(const std::tm& time) const {
 
     std::tm msk_time = event_time;
     msk_time.tm_hour += 1;
+    if (msk_time.tm_hour > 23) {
+        msk_time.tm_hour -= 24;
+    }
 
     return std::format("Следующая Асго ББ будет в {} ({})\nКаналы: {}", time_to_string(msk_time),
                        remaining_time_to_string(remaining_time), channels_to_string(events.at(time)));

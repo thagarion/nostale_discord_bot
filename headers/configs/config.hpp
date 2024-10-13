@@ -16,6 +16,8 @@ class Config {
     std::unordered_map<EventType, EventPtr> events;
 
     const std::string config_path;
+    const std::string storage_path;
+    const std::string schedule_path;
 
     void save() const;
 

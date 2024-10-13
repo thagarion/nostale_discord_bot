@@ -21,7 +21,7 @@ void Bot::Log(const log_level level, const std::string& message) {
     logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(level), message));
 }
 
-void Bot::SensNews(const RSSEvent& event) {
+void Bot::SendNews(const RSSEvent& event) {
     const auto channels = config.get_news_channels();
     for (const uint64_t channel : *channels) {
         for (auto &text : event.to_string()) {

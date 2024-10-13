@@ -6,10 +6,6 @@
 #include "logger/logger.hpp"
 #include "rss_feed/rss_event.hpp"
 
-#ifndef BOT_TOKEN
-#error "[BOT_TOKEN] not defined as CMAKE parameter"
-#endif
-
 using log_level = dpp::loglevel;
 
 class Bot {
@@ -26,5 +22,5 @@ class Bot {
 public:
     static void Init();
     static void Log(log_level level, const std::string& message);
-    static void SensNews(const RSSEvent& event);
+    static void SendNews(const RSSEvent& event);
 };

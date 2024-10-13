@@ -5,10 +5,9 @@
 #include "bot.hpp"
 #include "utils/time.hpp"
 
-Config::Config(const std::string& path) : config_path(path) {
-    if (std::filesystem::exists(path + "/config.yaml")) {
-        for (const YAML::Node config_node = YAML::LoadFile(path + "/config.yaml");
-             const auto& config_entry : config_node) {
+Config::Config(const std::string& path) : storage_path(path + "/storage.yaml"), schedule_path(path + "/schedule.yaml") {
+    if (std::filesystem::exists(storage_path)) {
+        for (const YAML::Node config_node = YAML::LoadFile(storage_path); const auto& config_entry : config_node) {
             auto guild_id = config_entry.first.as<uint64_t>();
             auto entry = config_entry.second.as<ConfigEntry>();
             settings[guild_id] = entry;
@@ -16,7 +15,7 @@ Config::Config(const std::string& path) : config_path(path) {
         }
     }
 
-    for (const YAML::Node events_node = YAML::LoadFile(path + "/events.yaml"); const auto& event : events_node) {
+    for (const YAML::Node events_node = YAML::LoadFile(schedule_path); const auto& event : events_node) {
         if (event.first.as<std::string>() == "ic") {
             Schedule ics;
             for (const auto& entry : event.second) {
@@ -85,11 +84,9 @@ void Config::set_value(const uint64_t guild_id, const std::string& key, const st
 }
 
 void Config::save() const {
-    const auto file_name = config_path + "/config.yaml";
-
-    std::ofstream config_file(file_name, std::ios::out | std::ios::trunc);
+    std::ofstream config_file(storage_path, std::ios::out | std::ios::trunc);
     if (!config_file) {
-        Bot::Log(log_level::ll_error, "Cannot open file for writing " + file_name);
+        Bot::Log(log_level::ll_error, "Cannot open file for writing " + storage_path);
         return;
     }
 

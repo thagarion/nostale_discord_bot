@@ -3,5 +3,5 @@ build
 cmake*
 logs
 
-configs/config.yaml
+configs/storage.yaml
 *.log

@@ -37,11 +37,11 @@ std::string RSSFeed::fetch_gemini_result(const std::string& input) {
     const auto payload = R"({
             "system_instruction": {
                 "parts": {
-                    "text": "Convert HTML to markdown for discord.
+                    "text": "Convert HTML to Markdown.
 1. You must not change the text
-2. You can use heading till 3 level (#, ## or ###)
+2. You can use heading till 3 level. Only #, ## or ###
 3. Convert tables into lists
-4. Dont use markdown images syntax. Just put image link instead"
+4. Do not use markdown images syntax. Just put image link instead"
                 }
             },
             "contents": {

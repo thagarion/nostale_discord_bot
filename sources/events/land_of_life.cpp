@@ -7,15 +7,16 @@ std::string LandOfLifeEvent::get_next() const {
     const auto current_time = get_current_time_gmt_2();
 
     for (const auto& time : std::views::keys(events)) {
-        auto asgobas = time;
-        asgobas.tm_hour += 1;
-        if (asgobas.tm_hour > 23) {
-            asgobas.tm_hour -= 24;
+        auto asgobas_time = time;
+        asgobas_time.tm_hour += 1;
+        if (asgobas_time.tm_hour > 23) {
+            asgobas_time.tm_hour -= 24;
         }
 
         if (time > current_time) {
             return to_string(time);
-        } else if (asgobas > current_time) {
+        }
+        if (asgobas_time > current_time) {
             return to_string_current(time);
         }
     }

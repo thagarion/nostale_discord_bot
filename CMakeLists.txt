@@ -18,6 +18,11 @@ else ()
 endif ()
 add_definitions(-DGEMINI_TOKEN=${GEMINI_TOKEN})
 
+if (LOG_CONSOLE)
+    add_definitions(-DLOG_CONSOLE)
+    message(STATUS "Log routed to console")
+endif ()
+
 include(FetchContent)
 FetchContent_Declare(
         dpp

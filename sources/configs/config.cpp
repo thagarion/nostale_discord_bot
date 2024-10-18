@@ -75,9 +75,17 @@ void Config::set_value(const uint64_t guild_id, const std::string& key, const st
     } else if (key == NEWS_CONF) {
         settings[guild_id].news_channel_id = strtoull(value.c_str(), nullptr, 10);
         news_channels.clear();
-        for (auto entry : std::views::values(settings)) {
+        for (auto& entry : std::views::values(settings)) {
             news_channels.push_back(entry.news_channel_id);
         }
+    }
+
+    save();
+}
+
+void Config::set_value(const uint64_t guild_id, const std::string& key, const std::vector<uint64_t>& value) {
+    if (key == ROLES_CONF) {
+        settings[guild_id].roles = value;
     }
 
     save();

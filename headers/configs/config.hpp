@@ -43,8 +43,19 @@ public:
         return 0;
     }
 
-    [[nodiscard]] const std::vector<uint64_t>* get_news_channels() const {
-        return &news_channels;
+    [[nodiscard]] const std::vector<uint64_t>* get_news_channels() const { return &news_channels; }
+
+    [[nodiscard]] uint64_t get_level_role_id(uint64_t guild_id, int level) const;
+
+    [[nodiscard]] uint64_t get_c_level_role_id(uint64_t guild_id, int level) const;
+
+    [[nodiscard]] std::vector<uint64_t> get_level_roles(const uint64_t guild_id) const {
+        return settings.at(guild_id).roles;
+    }
+
+    [[nodiscard]] bool has_role(const uint64_t guild_id, const uint64_t role_id) const {
+        return std::ranges::find(settings.at(guild_id).roles, role_id) !=
+               settings.at(guild_id).roles.end();
     }
 
     [[nodiscard]] std::string get_next_ic() const { return events.at(INSTANT_COMBAT)->get_next(); }

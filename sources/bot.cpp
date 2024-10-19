@@ -50,7 +50,7 @@ void Bot::on_ready(const dpp::ready_t& event) {
         bot_ptr->global_command_create(dpp::slashcommand(PING_COMMAND, "Проверка", bot_ptr->me.id));
         bot_ptr->global_command_create(dpp::slashcommand(CONF_COMMAND, "Настройки", bot_ptr->me.id)
                                            .add_option(dpp::command_option(dpp::co_string, "key", "Имя", true))
-                                           .add_option(dpp::command_option(dpp::co_string, "value", "Значение", true)));
+                                           .add_option(dpp::command_option(dpp::co_string, "value", "Значение")));
         bot_ptr->global_command_create(
             dpp::slashcommand(TIME_COMMAND, "Узнать время следующего ивента", bot_ptr->me.id)
                 .add_option(dpp::command_option(dpp::co_string, "event", "Название ивента", true)
@@ -63,29 +63,6 @@ void Bot::on_ready(const dpp::ready_t& event) {
         // bot_ptr->global_command_create(dpp::slashcommand("mara", "Начать марафон", bot_ptr->me.id)
         //                                    .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
     }
-
-    std::vector<std::string> roles = {LVL85_ROLE,  CLVL1_ROLE,  CLVL10_ROLE, CLVL20_ROLE, CLVL30_ROLE, CLVL40_ROLE,
-                                      CLVL50_ROLE, CLVL60_ROLE, CLVL70_ROLE, CLVL80_ROLE, CLVL90_ROLE};
-
-    for (const auto& guild_id : event.guilds) {
-        std::vector<uint64_t> role_ids;
-        for (const auto& role_name : roles) {
-            bool found = false;
-            auto guild_roles = dpp::get_role_cache();
-            // for (const auto& role_id : guild_roles) {
-            //     const auto role_found = dpp::find_role(role_id);
-            //     if (role_found->name == role_name) {
-            //         found = true;
-            //         role_ids.push_back(static_cast<uint64_t>(role_found->id));
-            //         break;
-            //     }
-            // }
-            if (!found) {
-                Log(dpp::ll_error, "Role " + role_name + " not found");
-            }
-        }
-        config.set_value(guild_id, ROLES_CONF, role_ids);
-    }
 }
 
 void Bot::on_slashcommand(const dpp::slashcommand_t& event) {
@@ -94,10 +71,35 @@ void Bot::on_slashcommand(const dpp::slashcommand_t& event) {
     }
     if (event.command.get_command_name() == CONF_COMMAND) {
         const auto key = std::get<std::string>(event.get_parameter("key"));
-        const auto value = std::get<std::string>(event.get_parameter("value"));
         if (event.command.get_issuing_user() == event.command.get_guild().owner_id) {
-            config.set_value(event.command.guild_id, key, value);
-            event.reply(dpp::message(std::format("OK")).set_flags(dpp::m_ephemeral));
+            if (key == ROLES_CONF) {
+                std::vector<uint64_t> role_ids;
+                for (const auto& role_name : std::views::values(roles_to_string)) {
+                    bool found = false;
+                    for (const auto& role_id : event.command.get_guild().roles) {
+                        if (dpp::find_role(role_id)->name == role_name) {
+                            role_ids.push_back(role_id);
+                            found = true;
+                            Log(dpp::ll_info, "Role found " + role_name);
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        dpp::role new_role;
+                        new_role.guild_id = event.command.guild_id;
+                        new_role.name = role_name;
+                        auto role_created = dpp::sync<dpp::role>(bot_ptr.get(), &dpp::cluster::role_create, new_role);
+                        role_ids.push_back(static_cast<uint64_t>(role_created.id));
+                        Log(dpp::ll_info, "Role created " + role_created.name);
+                    }
+                }
+                config.set_value(event.command.guild_id, "roles", role_ids);
+                event.reply(dpp::message(std::format("OK")).set_flags(dpp::m_ephemeral));
+            } else {
+                const auto value = std::get<std::string>(event.get_parameter("value"));
+                config.set_value(event.command.guild_id, key, value);
+                event.reply(dpp::message(std::format("OK")).set_flags(dpp::m_ephemeral));
+            }
         } else {
             event.reply(dpp::message(std::format("Эту команду может использовать только владелец сервера"))
                             .set_flags(dpp::m_ephemeral));
@@ -152,6 +154,13 @@ void Bot::on_autocomplete(const dpp::autocomplete_t& event) {
 
 void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
     const auto name = update.updated.get_nickname();
+    auto updated_user = dpp::find_guild(update.updated.guild_id)->members.at(update.updated.user_id);
+
+    for (const auto& role_id : updated_user.get_roles()) {
+        if (config.has_role(update.updated.guild_id, role_id)) {
+            updated_user.remove_role(role_id);
+        }
+    }
 
     const std::regex level_string_pattern(R"(\[[Cc0-9\/\]]+)");
     std::string level_string;
@@ -159,42 +168,33 @@ void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
     if (std::regex_search(name, match, level_string_pattern)) {
         level_string = match.str(0);
     } else {
-        Log(dpp::ll_error, "Can't parse name " + name);
+        bot_ptr->guild_edit_member(updated_user);
         return;
     }
 
     level_string = level_string.substr(1, level_string.size() - 2);
-    Log(dpp::ll_trace, "level string = " + level_string);
 
     const std::regex level_pattern(R"([Cc]?[0-9]+)");
 
     std::smatch match_levels;
     while (std::regex_search(level_string, match_levels, level_pattern)) {
         std::string level = match_levels.str(0);
+        uint64_t role_id = 0;
         if (level.front() == 'C' || level.front() == 'c') {
-            Log(dpp::ll_trace, "clevel string = " + level);
+            level = level.substr(1, level.size() - 1);
+            role_id = config.get_c_level_role_id(update.updated.guild_id, std::stoi(level));
         } else {
-            Log(dpp::ll_trace, " level string = " + level);
+            role_id = config.get_level_role_id(update.updated.guild_id, std::stoi(level));
         }
+        if (role_id > 0) {
+            if (std::find(updated_user.get_roles().begin(), updated_user.get_roles().end(), role_id) ==
+                updated_user.get_roles().end()) {
+                updated_user.add_role(role_id);
+            }
+        }
+
         level_string = match_levels.suffix().str();
     }
 
-    // const auto start = name.find_first_of('[') + 1;
-    // const auto end = name.find_last_of(']');
-    // if (start == std::string::npos || end == std::string::npos || end <= start) {
-    //     Log(dpp::ll_error, std::format("Can not parse levels in name [{}]", name));
-    //     return;
-    // }
-    // auto levels_string = name.substr(start, end - start);
-    // for (auto i = levels_string.find_first_of('/'); i != std::string::npos; i = levels_string.find_first_of('/')) {
-    //     auto level_string = levels_string.substr(0, i);
-    //     if (levels_string.front() == 'C' || levels_string.front() == 'c') {
-    //         level_string = level_string.substr(1, levels_string.size());
-    //         Log(dpp::ll_debug, "got clevel = " + level_string);
-    //     } else {
-    //         Log(dpp::ll_debug, "got level = " + level_string);
-    //     }
-    //     levels_string = levels_string.substr(i + 1, levels_string.size());
-    // }
-    // Log(dpp::ll_debug, "got number = " + levels_string);
+    bot_ptr->guild_edit_member(updated_user);
 }

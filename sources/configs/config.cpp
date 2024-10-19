@@ -91,6 +91,47 @@ void Config::set_value(const uint64_t guild_id, const std::string& key, const st
     save();
 }
 
+uint64_t Config::get_level_role_id(const uint64_t guild_id, const int level) const {
+    if (level > 0 && level <= 85) {
+        return settings.at(guild_id).roles.at(LVL85_ROLE);
+    }
+    return 0;
+}
+
+uint64_t Config::get_c_level_role_id(const uint64_t guild_id, const int level) const {
+    if (level > 0) {
+        if (level >= 90) {
+            return settings.at(guild_id).roles.at(CLVL90_ROLE);
+        }
+        if (level >= 80) {
+            return settings.at(guild_id).roles.at(CLVL80_ROLE);
+        }
+        if (level >= 70) {
+            return settings.at(guild_id).roles.at(CLVL70_ROLE);
+        }
+        if (level >= 60) {
+            return settings.at(guild_id).roles.at(CLVL60_ROLE);
+        }
+        if (level >= 50) {
+            return settings.at(guild_id).roles.at(CLVL50_ROLE);
+        }
+        if (level >= 40) {
+            return settings.at(guild_id).roles.at(CLVL40_ROLE);
+        }
+        if (level >= 30) {
+            return settings.at(guild_id).roles.at(CLVL30_ROLE);
+        }
+        if (level >= 20) {
+            return settings.at(guild_id).roles.at(CLVL20_ROLE);
+        }
+        if (level >= 10) {
+            return settings.at(guild_id).roles.at(CLVL10_ROLE);
+        }
+        return settings.at(guild_id).roles.at(CLVL1_ROLE);
+    }
+    return 0;
+}
+
 void Config::save() const {
     std::ofstream config_file(storage_path, std::ios::out | std::ios::trunc);
     if (!config_file) {

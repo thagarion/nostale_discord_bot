@@ -39,7 +39,7 @@ void Bot::on_log(const dpp::log_t& log) {
     std::cout << std::format("{}\t[{}]\t{}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
                              log.message)
               << std::endl;
-#elif
+#else
     logger.log(std::format("{}\t[{}]\t{}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
                            log.message));
 #endif

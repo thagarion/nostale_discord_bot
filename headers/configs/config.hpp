@@ -34,6 +34,7 @@ public:
     explicit Config(const std::string& path);
 
     void set_value(uint64_t guild_id, const std::string& key, const std::string& value);
+    void set_value(uint64_t guild_id, const std::string& key, const std::vector<uint64_t>& value);
 
     [[nodiscard]] uint64_t get_mara_channel_id(const uint64_t guild_id) const {
         if (settings.contains(guild_id)) {

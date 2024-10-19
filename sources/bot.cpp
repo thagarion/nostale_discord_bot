@@ -10,21 +10,24 @@ void Bot::Init() {
     bot_ptr->on_ready(on_ready);
     bot_ptr->on_slashcommand(on_slashcommand);
     bot_ptr->on_autocomplete(on_autocomplete);
-
-    // TODO set roles depends username
-    // bot_ptr->on_guild_member_update(on_guild_member_update);
+    bot_ptr->on_guild_member_update(on_guild_member_update);
 
     bot_ptr->start(dpp::st_wait);
 }
 
 void Bot::Log(const log_level level, const std::string& message) {
-    logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(level), message));
+#ifdef LOG_CONSOLE
+    std::cout << std::format("{}\t[{}]\t{}", dpp::utility::current_date_time(), dpp::utility::loglevel(level), message)
+              << std::endl;
+#else
+    logger.log(std::format("{}\t[{}]\t{}", dpp::utility::current_date_time(), dpp::utility::loglevel(level), message));
+#endif
 }
 
 void Bot::SendNews(const RSSEvent& event) {
     const auto channels = config.get_news_channels();
     for (const uint64_t channel : *channels) {
-        for (auto &text : event.to_string()) {
+        for (auto& text : event.to_string()) {
             bot_ptr->message_create(dpp::message(channel, text));
             sleep(5);
         }
@@ -32,8 +35,14 @@ void Bot::SendNews(const RSSEvent& event) {
 }
 
 void Bot::on_log(const dpp::log_t& log) {
-    logger.log(std::format("{} [{}] {}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
+#ifdef LOG_CONSOLE
+    std::cout << std::format("{}\t[{}]\t{}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
+                             log.message)
+              << std::endl;
+#elif
+    logger.log(std::format("{}\t[{}]\t{}", dpp::utility::current_date_time(), dpp::utility::loglevel(log.severity),
                            log.message));
+#endif
 }
 
 void Bot::on_ready(const dpp::ready_t& event) {
@@ -53,6 +62,29 @@ void Bot::on_ready(const dpp::ready_t& event) {
         // TODO mara channel
         // bot_ptr->global_command_create(dpp::slashcommand("mara", "Начать марафон", bot_ptr->me.id)
         //                                    .add_option(dpp::command_option(dpp::co_string, "name", "Название")));
+    }
+
+    std::vector<std::string> roles = {LVL85_ROLE,  CLVL1_ROLE,  CLVL10_ROLE, CLVL20_ROLE, CLVL30_ROLE, CLVL40_ROLE,
+                                      CLVL50_ROLE, CLVL60_ROLE, CLVL70_ROLE, CLVL80_ROLE, CLVL90_ROLE};
+
+    for (const auto& guild_id : event.guilds) {
+        std::vector<uint64_t> role_ids;
+        for (const auto& role_name : roles) {
+            bool found = false;
+            auto guild_roles = dpp::get_role_cache();
+            // for (const auto& role_id : guild_roles) {
+            //     const auto role_found = dpp::find_role(role_id);
+            //     if (role_found->name == role_name) {
+            //         found = true;
+            //         role_ids.push_back(static_cast<uint64_t>(role_found->id));
+            //         break;
+            //     }
+            // }
+            if (!found) {
+                Log(dpp::ll_error, "Role " + role_name + " not found");
+            }
+        }
+        config.set_value(guild_id, ROLES_CONF, role_ids);
     }
 }
 
@@ -121,22 +153,48 @@ void Bot::on_autocomplete(const dpp::autocomplete_t& event) {
 void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
     const auto name = update.updated.get_nickname();
 
-    const auto start = name.find_first_of('[') + 1;
-    const auto end = name.find_last_of(']');
-    if (start == std::string::npos || end == std::string::npos || end <= start) {
-        // bot.log(dpp::ll_error, std::format("Can not parse levels in name [{}]", name));
+    const std::regex level_string_pattern(R"(\[[Cc0-9\/\]]+)");
+    std::string level_string;
+    std::smatch match;
+    if (std::regex_search(name, match, level_string_pattern)) {
+        level_string = match.str(0);
+    } else {
+        Log(dpp::ll_error, "Can't parse name " + name);
         return;
     }
-    auto levels_string = name.substr(start, end - start);
-    for (auto i = levels_string.find_first_of('/'); i != std::string::npos; i = levels_string.find_first_of('/')) {
-        auto level_string = levels_string.substr(0, i);
-        if (levels_string.front() == 'C' || levels_string.front() == 'c') {
-            level_string = level_string.substr(1, levels_string.size());
-            // bot.log(dpp::ll_debug, "got clevel = " + level_string);
+
+    level_string = level_string.substr(1, level_string.size() - 2);
+    Log(dpp::ll_trace, "level string = " + level_string);
+
+    const std::regex level_pattern(R"([Cc]?[0-9]+)");
+
+    std::smatch match_levels;
+    while (std::regex_search(level_string, match_levels, level_pattern)) {
+        std::string level = match_levels.str(0);
+        if (level.front() == 'C' || level.front() == 'c') {
+            Log(dpp::ll_trace, "clevel string = " + level);
         } else {
-            // bot.log(dpp::ll_debug, "got level = " + level_string);
+            Log(dpp::ll_trace, " level string = " + level);
         }
-        levels_string = levels_string.substr(i + 1, levels_string.size());
+        level_string = match_levels.suffix().str();
     }
-    // bot.log(dpp::ll_debug, "got number = " + levels_string);
+
+    // const auto start = name.find_first_of('[') + 1;
+    // const auto end = name.find_last_of(']');
+    // if (start == std::string::npos || end == std::string::npos || end <= start) {
+    //     Log(dpp::ll_error, std::format("Can not parse levels in name [{}]", name));
+    //     return;
+    // }
+    // auto levels_string = name.substr(start, end - start);
+    // for (auto i = levels_string.find_first_of('/'); i != std::string::npos; i = levels_string.find_first_of('/')) {
+    //     auto level_string = levels_string.substr(0, i);
+    //     if (levels_string.front() == 'C' || levels_string.front() == 'c') {
+    //         level_string = level_string.substr(1, levels_string.size());
+    //         Log(dpp::ll_debug, "got clevel = " + level_string);
+    //     } else {
+    //         Log(dpp::ll_debug, "got level = " + level_string);
+    //     }
+    //     levels_string = levels_string.substr(i + 1, levels_string.size());
+    // }
+    // Log(dpp::ll_debug, "got number = " + levels_string);
 }

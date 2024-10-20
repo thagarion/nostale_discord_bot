@@ -4,7 +4,7 @@
 #include "rss_feed/rss_event.hpp"
 
 void Bot::Init() {
-    bot_ptr = std::make_unique<dpp::cluster>(BOT_TOKEN);
+    bot_ptr = std::make_unique<dpp::cluster>(BOT_TOKEN, dpp::i_all_intents);
 
     bot_ptr->on_log(on_log);
     bot_ptr->on_ready(on_ready);
@@ -153,10 +153,18 @@ void Bot::on_autocomplete(const dpp::autocomplete_t& event) {
 }
 
 void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
+    Log(dpp::ll_trace, "on_guild_member_update");
+    if (const auto it = std::ranges::find(updated_users, static_cast<uint64_t>(update.updated.user_id));
+        it != updated_users.end()) {
+        updated_users.erase(it);
+        return;
+    }
+
     const auto name = update.updated.get_nickname();
+
     auto updated_user = dpp::find_guild(update.updated.guild_id)->members.at(update.updated.user_id);
 
-    for (const auto& role_id : updated_user.get_roles()) {
+    for (const auto& role_id : update.updated.get_roles()) {
         if (config.has_role(update.updated.guild_id, role_id)) {
             updated_user.remove_role(role_id);
         }
@@ -168,6 +176,7 @@ void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
     if (std::regex_search(name, match, level_string_pattern)) {
         level_string = match.str(0);
     } else {
+        updated_users.push_back(update.updated.user_id);
         bot_ptr->guild_edit_member(updated_user);
         return;
     }
@@ -179,7 +188,7 @@ void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
     std::smatch match_levels;
     while (std::regex_search(level_string, match_levels, level_pattern)) {
         std::string level = match_levels.str(0);
-        uint64_t role_id = 0;
+        uint64_t role_id;
         if (level.front() == 'C' || level.front() == 'c') {
             level = level.substr(1, level.size() - 1);
             role_id = config.get_c_level_role_id(update.updated.guild_id, std::stoi(level));
@@ -196,5 +205,6 @@ void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
         level_string = match_levels.suffix().str();
     }
 
+    updated_users.push_back(update.updated.user_id);
     bot_ptr->guild_edit_member(updated_user);
 }

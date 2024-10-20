@@ -13,6 +13,8 @@ class Bot {
     inline static auto config = Config("configs");
     inline static auto logger = Logger();
 
+    inline static std::vector<uint64_t> updated_users = {};
+
     static void on_log(const dpp::log_t& log);
     static void on_ready(const dpp::ready_t& event);
     static void on_slashcommand(const dpp::slashcommand_t& event);

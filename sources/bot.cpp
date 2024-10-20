@@ -170,7 +170,7 @@ void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
         }
     }
 
-    const std::regex level_string_pattern(R"(\[[Cc0-9\/\]]+)");
+    const std::regex level_string_pattern(R"(\[[Cc0-9\/]+\])");
     std::string level_string;
     std::smatch match;
     if (std::regex_search(name, match, level_string_pattern)) {

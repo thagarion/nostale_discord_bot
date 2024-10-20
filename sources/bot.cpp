@@ -153,7 +153,6 @@ void Bot::on_autocomplete(const dpp::autocomplete_t& event) {
 }
 
 void Bot::on_guild_member_update(const dpp::guild_member_update_t& update) {
-    Log(dpp::ll_trace, "on_guild_member_update");
     if (const auto it = std::ranges::find(updated_users, static_cast<uint64_t>(update.updated.user_id));
         it != updated_users.end()) {
         updated_users.erase(it);

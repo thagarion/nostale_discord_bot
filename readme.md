@@ -20,3 +20,11 @@ cmake -DBOT_TOKEN="\"discord.bot.token\"" -DGEMINI_TOKEN="\"gemini.token\"" .. &
 
 - Set News Channel `/conf news <channel.id>`
 - Set Mara Channel `/conf mara <channel.id>`
+- Create or Find Level roles `/conf roles`
+
+### TODOs
+
+- [ ] Valid stopping bot by signal 2 or 3
+- [ ] Mara creation command
+- [ ] Removing of messages in trading channel
+- [ ] Formatting news: split by image

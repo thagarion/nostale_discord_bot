@@ -28,7 +28,9 @@ void Bot::SendNews(const RSSEvent& event) {
     const auto channels = config.get_news_channels();
     for (const uint64_t channel : *channels) {
         for (auto& text : event.to_string()) {
-            bot_ptr->message_create(dpp::message(channel, text));
+            auto message = dpp::message(channel, text);
+            message.set_flags(dpp::m_suppress_embeds);
+            bot_ptr->message_create(message);
             sleep(5);
         }
     }

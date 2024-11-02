@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(nostale_discord_bot VERSION 1.0 DESCRIPTION "A discord bot")
+set(project_name "nostale_discord_bot")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -47,9 +48,14 @@ file(GLOB_RECURSE sources "sources/**.cpp")
 file(GLOB_RECURSE headers "headers/**.hpp")
 
 include_directories(${project_name} PUBLIC headers ${DPP_INCLUDE_DIR} ${HTML2MD_INCLUDE_DIR} ${JSON_INCLUDE_DIR})
-
 add_executable(${project_name} PUBLIC main.cpp ${sources} ${headers})
-
 target_link_libraries(${project_name} PUBLIC pthread dpp html2md yaml-cpp curl tinyxml2 nlohmann_json)
-
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})
+
+enable_testing()
+set(project_name_test ${project_name}_tests)
+file(GLOB_RECURSE test_sources "tests/**.cpp")
+include_directories(${project_name_test} PUBLIC headers ${DPP_INCLUDE_DIR} ${HTML2MD_INCLUDE_DIR} ${JSON_INCLUDE_DIR})
+add_executable(${project_name_test} ${test_sources} ${sources})
+target_link_libraries(${project_name_test} PUBLIC gtest gtest_main dpp html2md yaml-cpp curl tinyxml2 nlohmann_json)
+add_test(NAME RunTests COMMAND ${project_name_test})

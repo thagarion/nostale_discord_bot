@@ -1,5 +1,7 @@
 #include "bot.hpp"
 
+#include <regex>
+
 #include "enums.hpp"
 #include "rss_feed/rss_event.hpp"
 
@@ -24,13 +26,27 @@ void Bot::Log(const log_level level, const std::string& message) {
 #endif
 }
 
-void Bot::SendNews(const RSSEvent& event) {
+void Bot::SendNews(RSSEvent& event) {
     const auto channels = config.get_news_channels();
-    for (const uint64_t channel : *channels) {
-        for (auto& text : event.to_string()) {
+    for (auto& [text, link] : event.get_content()) {
+        for (const uint64_t channel : *channels) {
             auto message = dpp::message(channel, text);
             message.set_flags(dpp::m_suppress_embeds);
+            message.set_channel_id(channel);
+
+            if (!link.empty()) {
+                bot_ptr->request(link, dpp::m_get,
+                                 [&](const dpp::http_request_completion_t& httpRequestCompletion) {
+                                     if (httpRequestCompletion.status == 200) {
+                                         message.add_file("image.png", httpRequestCompletion.body);
+                                     } else {
+                                         bot_ptr->log(dpp::ll_error, "Can't download image");
+                                     }
+                                     bot_ptr->message_create(message);
+                                 });
+            }
             bot_ptr->message_create(message);
+
             sleep(5);
         }
     }

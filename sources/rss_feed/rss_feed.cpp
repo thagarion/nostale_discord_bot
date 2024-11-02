@@ -1,6 +1,7 @@
 #include "rss_feed/rss_feed.hpp"
 
 #include <curl/curl.h>
+#include <regex>
 #include <tinyxml2.h>
 
 #include "rss_feed/rss_event.hpp"
@@ -38,10 +39,9 @@ std::string RSSFeed::fetch_gemini_result(const std::string& input) {
             "system_instruction": {
                 "parts": {
                     "text": "Convert HTML to Markdown.
-1. You must not change the text
-2. You can use heading till 3 level. Only #, ## or ###
-3. Convert tables into lists
-4. Do not use markdown images syntax. Just put image link instead"
+Do not change the text.
+Convert tables into lists.
+Do not use markdown images syntax. Put image link instead."
                 }
             },
             "contents": {
@@ -76,7 +76,7 @@ std::string RSSFeed::fetch_gemini_result(const std::string& input) {
 
     auto json_doc = nlohmann::json::parse(buffer);
     buffer = json_doc.at("candidates").at(0).at("content").at("parts").at(0).at("text").dump();
-    buffer = std::regex_replace(buffer, std::regex("\\\\n"), "\n");
+    buffer = std::regex_replace(buffer, std::regex("(\\n){2,}"), "\n");
     buffer = std::regex_replace(buffer, std::regex("\""), "");
     buffer = std::regex_replace(buffer, std::regex("#{4,}"), "###");
 
@@ -115,9 +115,8 @@ void RSSFeed::parse(const std::string& data) {
             continue;
         }
 
-        std::string link;
         if (const tinyxml2::XMLElement* element = item->FirstChildElement("link")) {
-            link = element->GetText();
+            event.set_link(element->GetText());
         } else {
             Bot::Log(dpp::ll_error, "RSS Event not contained link");
             continue;
@@ -133,7 +132,7 @@ void RSSFeed::parse(const std::string& data) {
         if (*event.get_date() > last_event) {
             if (const tinyxml2::XMLElement* element = item->FirstChildElement("content:encoded")) {
                 std::string content = element->GetText();
-                auto result = parse_content(content).append("\n").append(link).append("\n");
+                auto result = parse_content(content);
                 event.set_content(result);
             } else {
                 Bot::Log(dpp::ll_error, "RSS Event not contained pubDate");

@@ -12,6 +12,7 @@ std::string LandOfDeathEvent::get_next() const {
         if (dark_horn_time.tm_hour > 23) {
             dark_horn_time.tm_hour -= 24;
         }
+
         if (time > current_time) {
             return to_string(time);
         }
@@ -23,55 +24,41 @@ std::string LandOfDeathEvent::get_next() const {
 }
 
 std::string LandOfDeathEvent::to_string(const std::tm& time) const {
-    const std::time_t now = std::time(nullptr);
-    std::tm* current_time = std::gmtime(&now);
-    current_time->tm_hour += 2;
+    auto current_time = get_current_date_time_mks();
 
-    std::tm event_time = *current_time;
-    event_time.tm_hour = time.tm_hour;
-    event_time.tm_min = time.tm_min;
-    event_time.tm_sec = 0;
+    std::tm event_time = time;
+    std::tm event_msk = get_date_time_mks(&event_time);
 
-    auto remaining_time = std::chrono::seconds(std::mktime(&event_time) - std::mktime(current_time));
-    if (remaining_time.count() < 0) {
-        event_time.tm_mday += 1;
-        remaining_time = std::chrono::seconds(std::mktime(&event_time) - std::mktime(current_time));
-    }
+    const auto remaining_time = std::chrono::seconds(std::mktime(&event_msk) - std::mktime(&current_time));
 
-    std::tm msk_time = event_time;
-    msk_time.tm_hour += 1;
+    event_time.tm_hour += 1;
 
-    std::tm dark_horn_time = msk_time;
-    dark_horn_time.tm_hour += 1;
+    std::tm dark_horn_msk = get_date_time_mks(&event_time);
 
-    const auto dark_horn_remaining_time = remaining_time + std::chrono::hours(1);
+    const auto dark_horn_remaining_time =
+        std::chrono::seconds(std::mktime(&dark_horn_msk) - std::mktime(&current_time));
 
-    return std::format("Следующий ЛоД будет в {} ({})\nДХ в {} ({})\nКаналы: {}", time_to_string(msk_time),
-                       remaining_time_to_string(remaining_time), time_to_string(dark_horn_time),
+    return std::format("Следующий ЛоД будет в {} ({})\nДХ в {} ({})\nКаналы: {}", time_to_string(event_msk),
+                       remaining_time_to_string(remaining_time), time_to_string(dark_horn_msk),
                        remaining_time_to_string(dark_horn_remaining_time), channels_to_string(events.at(time)));
 }
 
 std::string LandOfDeathEvent::to_string_current(const std::tm& time) const {
-    const std::time_t now = std::time(nullptr);
-    std::tm* current_time = std::gmtime(&now);
-    current_time->tm_hour += 2;
+    auto current_time = get_current_date_time_mks();
 
-    std::tm event_time = *current_time;
-    event_time.tm_hour = time.tm_hour;
-    event_time.tm_min = time.tm_min;
-    event_time.tm_sec = 0;
+    std::tm event_time = time;
+    std::tm event_msk = get_date_time_mks(&event_time);
 
-    const auto remaining_time = -std::chrono::seconds(std::mktime(&event_time) - std::mktime(current_time));
+    const auto past_time = -std::chrono::seconds(std::mktime(&event_msk) - std::mktime(&current_time));
 
-    std::tm msk_time = event_time;
-    msk_time.tm_hour += 1;
+    event_time.tm_hour += 1;
 
-    std::tm dark_horn_time = msk_time;
-    dark_horn_time.tm_hour += 1;
+    std::tm dark_horn_msk = get_date_time_mks(&event_time);
 
-    const auto dark_horn_remaining_time = std::chrono::seconds(std::mktime(&msk_time) - std::mktime(current_time));
+    const auto dark_horn_remaining_time =
+        std::chrono::seconds(std::mktime(&dark_horn_msk) - std::mktime(&current_time));
 
-    return std::format("ЛоД начался в {} ({})\nДХ в {} ({})\nКаналы: {}", time_to_string(msk_time),
-                       past_time_to_string(remaining_time), time_to_string(dark_horn_time),
+    return std::format("ЛоД начался в {} ({})\nДХ в {} ({})\nКаналы: {}", time_to_string(event_msk),
+                       past_time_to_string(past_time), time_to_string(dark_horn_msk),
                        remaining_time_to_string(dark_horn_remaining_time), channels_to_string(events.at(time)));
 }

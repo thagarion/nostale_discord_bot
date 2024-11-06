@@ -2,6 +2,7 @@
 
 ```shell
 sudo apt-get install cmake gcc-13 build-essential
+sudo apt-get install libgtest-dev libgmock-dev
 sudo apt-get install zlib1g-dev
 sudo apt-get install libssl-dev
 sudo apt-get install libyaml-cpp-dev

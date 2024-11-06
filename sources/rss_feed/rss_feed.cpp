@@ -38,10 +38,11 @@ std::string RSSFeed::fetch_gemini_result(const std::string& input) {
     const auto payload = R"({
             "system_instruction": {
                 "parts": {
-                    "text": "Convert HTML to Markdown.
-Do not change the text.
-Convert tables into lists.
-Do not use markdown images syntax. Put image link instead."
+                    "text": "1. Convert HTML to markdown.
+2. You must not change the text.
+3. You can use heading 2 or 3 level if needed (## or ###).
+4. Convert tables into lists.
+5. Dont use markdowns images syntax. Just put image link instead."
                 }
             },
             "contents": {
@@ -76,7 +77,7 @@ Do not use markdown images syntax. Put image link instead."
 
     auto json_doc = nlohmann::json::parse(buffer);
     buffer = json_doc.at("candidates").at(0).at("content").at("parts").at(0).at("text").dump();
-    buffer = std::regex_replace(buffer, std::regex("(\\n){2,}"), "\n");
+    buffer = std::regex_replace(buffer, std::regex("\\\\n"), "\n");
     buffer = std::regex_replace(buffer, std::regex("\""), "");
     buffer = std::regex_replace(buffer, std::regex("#{4,}"), "###");
 

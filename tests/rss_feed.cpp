@@ -2,6 +2,41 @@
 
 #include "rss_feed/rss_event.hpp"
 
+TEST(RSSEvent, set_content_short) {
+    std::string message = R""""("## Great news, everyone!
+
+https://image.board.gameforge.com/uploads/nostale/en/announcement_nostale_en_e26ff8ebdffe8793801d1453997fc980.jpg
+
+The NosWheel has lots of new rewards that can help you on your adventures. Spin the wheel today and find out what surprise is waiting for you!
+
+Even if you’re already a NosWheel veteran, it’s worth a try because Fortuna’s breath of fresh air has brought brand-new prizes.
+
+### Potential Prizes
+
+* 10x Sealed Champion Blessing Amulet (Random)
+* Retro Wings Box
+* Baby Panda
+* Gingerbread Fortune Box
+* Vampire Marie
+* 20x Fairy Booster
+* Pet Bead
+* One-Winged Perti Specialist Partner Card
+* 20x Large Lump of Gold + 500 NosDollars
+* Fabulous (Title)
+* ... and much more!
+
+Remember you’ve got to spin it to win it!
+
+The NosTale Team
+")"""";
+
+    auto event = RSSEvent();
+    event.set_content(message);
+
+    const auto messages = event.get_content();
+    EXPECT_EQ(messages.size(), 1);
+}
+
 TEST(RSSEvent, set_content) {
     std::string message = R""""(
 With great effort together with Mimi and Eva you have managed to gather some clues by completing tasks and solving puzzles. Now, we are closer to our goal than ever before!.

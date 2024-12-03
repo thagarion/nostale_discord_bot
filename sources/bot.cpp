@@ -26,12 +26,12 @@ void Bot::Log(const log_level level, const std::string& message) {
 #endif
 }
 
-void Bot::SendNews(RSSEvent& event) {
+void Bot::SendNews(const RSSEvent& event) {
     const auto channels = config.get_news_channels();
-    for (auto& [text, link] : event.get_content()) {
+    for (const auto& [text, link] : *event.get_content()) {
         for (const uint64_t channel : *channels) {
             auto message = dpp::message(channel, text);
-            message.set_flags(dpp::m_suppress_embeds);
+            message.set_flags(dpp::m_crossposted | dpp::m_suppress_embeds);
             message.set_channel_id(channel);
 
             if (!link.empty()) {

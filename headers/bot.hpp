@@ -24,5 +24,5 @@ class Bot {
 public:
     static void Init();
     static void Log(log_level level, const std::string& message);
-    static void SendNews(RSSEvent& event);
+    static void SendNews(const RSSEvent& event);
 };

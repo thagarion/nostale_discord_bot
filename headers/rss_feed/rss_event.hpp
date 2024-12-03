@@ -24,7 +24,7 @@ public:
     void set_date(const std::string& value) { strptime(value.c_str(), "%a, %d %b %Y %H:%M:%S %z", &date); }
     void set_content(std::string& text);
 
-    [[nodiscard]] ContentVector get_content();
+    [[nodiscard]] const ContentVector* get_content() const;
     [[nodiscard]] const std::tm* get_date() const { return &date; };
     [[nodiscard]] std::string get_date_string() const {
         return std::format("Publication Time: {:02}:{:02} CEST", date.tm_hour, date.tm_min);

@@ -48,7 +48,7 @@ file(GLOB_RECURSE sources "sources/**.cpp")
 file(GLOB_RECURSE headers "headers/**.hpp")
 
 include_directories(${project_name} PUBLIC headers ${DPP_INCLUDE_DIR} ${HTML2MD_INCLUDE_DIR} ${JSON_INCLUDE_DIR})
-add_executable(${project_name} PUBLIC main.cpp ${sources} ${headers})
+add_executable(${project_name} main.cpp ${sources} ${headers})
 target_link_libraries(${project_name} PUBLIC pthread dpp html2md yaml-cpp curl tinyxml2 nlohmann_json)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})
 

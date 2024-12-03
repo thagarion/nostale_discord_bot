@@ -34,7 +34,7 @@ The NosTale Team
     event.set_content(message);
 
     const auto messages = event.get_content();
-    EXPECT_EQ(messages.size(), 1);
+    EXPECT_EQ(messages->size(), 1);
 }
 
 TEST(RSSEvent, set_content) {
@@ -71,7 +71,7 @@ https://s20.directupload.net/images/240928/4egezyww.png)"""";
     event.set_content(message);
 
     const auto messages = event.get_content();
-    EXPECT_EQ(messages.size(), 2);
+    EXPECT_EQ(messages->size(), 2);
 }
 
 TEST(RSSEvent, set_content_long) {
@@ -134,5 +134,5 @@ https://s20.directupload.net/images/240928/4egezyww.png)"""";
     event.set_content(message);
 
     const auto messages = event.get_content();
-    EXPECT_EQ(messages.size(), 3);
+    EXPECT_EQ(messages->size(), 3);
 }

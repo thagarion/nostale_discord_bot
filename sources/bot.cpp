@@ -35,18 +35,18 @@ void Bot::SendNews(const RSSEvent& event) {
             message.set_channel_id(channel);
 
             if (!link.empty()) {
-                bot_ptr->request(link, dpp::m_get,
-                                 [&](const dpp::http_request_completion_t& httpRequestCompletion) {
-                                     if (httpRequestCompletion.status == 200) {
-                                         message.add_file("image.png", httpRequestCompletion.body);
-                                     } else {
-                                         bot_ptr->log(dpp::ll_error, "Can't download image");
-                                     }
-                                     bot_ptr->message_create(message);
-                                 });
+                bot_ptr->request(link, dpp::m_get, [&](const dpp::http_request_completion_t& httpRequestCompletion) {
+                    if (httpRequestCompletion.status == 200) {
+                        message.add_file("image.png", httpRequestCompletion.body);
+                    } else {
+                        bot_ptr->log(dpp::ll_error, "Can't download image");
+                    }
+                    bot_ptr->message_create(message);
+                });
+            } else {
+                bot_ptr->message_create(message);
             }
-            bot_ptr->message_create(message);
-
+            
             sleep(5);
         }
     }

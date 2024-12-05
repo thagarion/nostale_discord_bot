@@ -24,38 +24,29 @@ void RSSEvent::set_content(std::string& text) {
         it = text.cbegin();
     }
 
-    if (links.size() <= 1 && text.size() <= max_message_symbols) {
-        ContentItem item;
-        item.first = text;
-        if (links.size() == 1) {
-            item.second = links[0];
-        }
-        content.push_back(item);
-    } else {
-        size_t start = 0;
-        for (const auto& [index, link] : links) {
-            if ((index - start) < max_message_symbols) {
-                ContentItem item;
-                item.first = text.substr(start, index);
-                content.push_back(item);
-            } else {
-                auto text_part = text.substr(start, index);
-                auto part_start = 0;
-                while (part_start < text_part.size()) {
-                    const size_t end = std::min(part_start + max_message_symbols, text.size());
-                    size_t last_newline = text.find_last_of('\n', end);
-                    if (last_newline == std::string::npos || last_newline <= start) {
-                        last_newline = end;
-                    }
-                    ContentItem item;
-                    item.first = text_part.substr(part_start, last_newline - part_start);
-                    content.push_back(item);
+    size_t start = 0;
+    const size_t text_size = text.size();
+    auto link_it = links.begin();
 
-                    part_start = static_cast<int>(last_newline) + 1;
-                }
+    while (start < text_size) {
+        size_t end = std::min(start + max_message_symbols, text_size);
+        std::string associated_link;
+
+        if (link_it != links.end() && link_it->first < static_cast<int>(end)) {
+            end = link_it->first + 1; 
+            associated_link = link_it->second;
+        } else {
+            const size_t newline_pos = text.rfind('\n', end - 1);
+            if (newline_pos != std::string::npos && newline_pos >= start) {
+                end = newline_pos + 1;
             }
-            start = index + 1;
-            content.back().second = link;
+        }
+
+        content.emplace_back(text.substr(start, end - start), associated_link);
+        start = end;
+
+        while (link_it != links.end() && link_it->first < static_cast<int>(start)) {
+            ++link_it;
         }
     }
 
@@ -67,6 +58,4 @@ void RSSEvent::set_content(std::string& text) {
     }
 }
 
-const ContentVector* RSSEvent::get_content() const {
-    return &content;
-}
+const ContentVector* RSSEvent::get_content() const { return &content; }

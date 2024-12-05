@@ -18,6 +18,7 @@ class RSSFeed {
 
     static std::string fetch_feed();
     static std::string fetch_gemini_result(const std::string& input);
+    static std::string fetch_gemini_translate(const std::string& input);
 
     static void parse(const std::string& data);
     static std::string parse_content(std::string& text);

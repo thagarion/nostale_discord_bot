@@ -11,6 +11,7 @@
 
 #define MARA_CONF "mara"
 #define NEWS_CONF "news"
+#define NEWS_TR_CONF "news_tr"
 #define ROLES_CONF "roles"
 
 enum Level_Roles {

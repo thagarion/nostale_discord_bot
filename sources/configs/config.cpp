@@ -12,6 +12,7 @@ Config::Config(const std::string& path) : storage_path(path + "/storage.yaml"), 
             auto entry = config_entry.second.as<ConfigEntry>();
             settings[guild_id] = entry;
             news_channels.push_back(entry.news_channel_id);
+            news_translated_channels.push_back(entry.news_translated_channel_id);
         }
     }
 
@@ -77,6 +78,12 @@ void Config::set_value(const uint64_t guild_id, const std::string& key, const st
         news_channels.clear();
         for (auto& entry : std::views::values(settings)) {
             news_channels.push_back(entry.news_channel_id);
+        }
+    } else if (key == NEWS_TR_CONF) {
+        settings[guild_id].news_translated_channel_id = strtoull(value.c_str(), nullptr, 10);
+        news_translated_channels.clear();
+        for (auto& entry : std::views::values(settings)) {
+            news_translated_channels.push_back(entry.news_translated_channel_id);
         }
     }
 

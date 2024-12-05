@@ -21,8 +21,11 @@ class Bot {
     static void on_autocomplete(const dpp::autocomplete_t& event);
     static void on_guild_member_update(const dpp::guild_member_update_t& update);
 
+    static void send_news(const RSSEvent& event, const std::vector<uint64_t>* channels);
+
 public:
     static void Init();
     static void Log(log_level level, const std::string& message);
     static void SendNews(const RSSEvent& event);
+    static void SendNewsTranslated(const RSSEvent& event);
 };

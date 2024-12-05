@@ -5,6 +5,7 @@
 #include <string>
 
 void RSSEvent::set_content(std::string& text) {
+    content.clear();
     std::map<size_t, std::string> links;
     max_message_symbols = 2000 - std::format("# {}\n{}\n", title, get_date_string()).size();
 
@@ -33,7 +34,7 @@ void RSSEvent::set_content(std::string& text) {
         std::string associated_link;
 
         if (link_it != links.end() && link_it->first < static_cast<int>(end)) {
-            end = link_it->first + 1; 
+            end = link_it->first + 1;
             associated_link = link_it->second;
         } else {
             const size_t newline_pos = text.rfind('\n', end - 1);
@@ -50,12 +51,7 @@ void RSSEvent::set_content(std::string& text) {
         }
     }
 
-    for (int i = 0; i < content.size(); i++) {
-        if (i == 0) {
-            content[i].first = std::format("# {}\n{}\n{}\n{}", title, get_date_string(), link, content[i].first);
-        }
-        content[i].first = std::regex_replace(content[i].first, std::regex("(\\n){2,}"), "\n");
-    }
+    content[0].first = std::format("# {}\n{}\n{}\n{}", title, get_date_string(), link, content[0].first);
 }
 
 const ContentVector* RSSEvent::get_content() const { return &content; }

@@ -13,6 +13,7 @@ typedef std::shared_ptr<Event> EventPtr;
 class Config {
     std::unordered_map<uint64_t, ConfigEntry> settings;
     std::vector<uint64_t> news_channels;
+    std::vector<uint64_t> news_translated_channels;
     std::unordered_map<EventType, EventPtr> events;
 
     const std::string config_path;
@@ -44,6 +45,8 @@ public:
     }
 
     [[nodiscard]] const std::vector<uint64_t>* get_news_channels() const { return &news_channels; }
+
+    [[nodiscard]] const std::vector<uint64_t>* get_news_translated_channels() const { return &news_translated_channels; }
 
     [[nodiscard]] uint64_t get_level_role_id(uint64_t guild_id, int level) const;
 

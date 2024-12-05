@@ -26,8 +26,11 @@ void Bot::Log(const log_level level, const std::string& message) {
 #endif
 }
 
-void Bot::SendNews(const RSSEvent& event) {
-    const auto channels = config.get_news_channels();
+void Bot::SendNews(const RSSEvent& event) { send_news(event, config.get_news_channels()); }
+
+void Bot::SendNewsTranslated(const RSSEvent& event) { send_news(event, config.get_news_translated_channels()); }
+
+void Bot::send_news(const RSSEvent& event, const std::vector<uint64_t>* channels) {
     for (const auto& [text, link] : *event.get_content()) {
         for (const uint64_t channel : *channels) {
             auto message = dpp::message(channel, text);
@@ -46,7 +49,7 @@ void Bot::SendNews(const RSSEvent& event) {
             } else {
                 bot_ptr->message_create(message);
             }
-            
+
             sleep(5);
         }
     }

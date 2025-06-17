@@ -4,4 +4,5 @@ cmake*
 logs
 
 configs/storage.yaml
+configs/data.db
 *.log

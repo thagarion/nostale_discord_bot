@@ -25,7 +25,8 @@ public:
     void set_content(std::string& text);
 
     [[nodiscard]] const ContentVector* get_content() const;
-    [[nodiscard]] const std::tm* get_date() const { return &date; };
+    [[nodiscard]] std::tm* get_date() { return &date; };
+    [[nodiscard]] std::string get_title() const { return title; };
     [[nodiscard]] std::string get_date_string() const {
         return std::format("Publication Time: {:02}:{:02} CEST", date.tm_hour, date.tm_min);
     }

@@ -114,7 +114,7 @@ void Bot::on_slashcommand(const dpp::slashcommand_t& event) {
                         Log(dpp::ll_info, "Role created " + role_created.name);
                     }
                 }
-                config.set_value(event.command.guild_id, "roles", role_ids);
+                config.set_value(event.command.guild_id, ROLES_CONF, role_ids);
                 event.reply(dpp::message(std::format("OK")).set_flags(dpp::m_ephemeral));
             } else {
                 const auto value = std::get<std::string>(event.get_parameter("value"));

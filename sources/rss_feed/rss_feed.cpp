@@ -135,6 +135,44 @@ std::string RSSFeed::fetch_gemini_translate(const std::string& input) {
     return buffer;
 }
 
+void RSSFeed::store_to_sqlite3(int date, std::string title, std::string original, std::string formatted,
+                               std::string translated) {
+    char* sqlite_error_msg = nullptr;
+
+    if (const int rc = sqlite3_open("configs/data.db", &data_base)) {
+        std::cerr << "Can't open database: " << sqlite3_errmsg(data_base) << "[" << rc << "]" << std::endl;
+        return;
+    }
+
+    const auto sql_create = R"(
+                CREATE TABLE IF NOT EXISTS news (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    original TEXT NOT NULL,
+                    formatted TEXT,
+                    translated TEXT
+                );
+            )";
+
+    if (const int rc = sqlite3_exec(data_base, sql_create, nullptr, nullptr, &sqlite_error_msg); rc != SQLITE_OK) {
+        std::cerr << "SQL error (create): " << sqlite_error_msg << std::endl;
+        sqlite3_free(sqlite_error_msg);
+    }
+
+    const auto sql_insert = std::format(
+        "INSERT INTO news (timestamp, title, original, formatted, translated) VALUES ({}, '{}','{}','{}','{}');", date,
+        title, original, formatted, translated);
+
+    if (const auto rc = sqlite3_exec(data_base, sql_insert.c_str(), nullptr, nullptr, &sqlite_error_msg);
+        rc != SQLITE_OK) {
+        std::cerr << "SQL error (insert): " << sqlite_error_msg << std::endl;
+        sqlite3_free(sqlite_error_msg);
+    }
+
+    sqlite3_close(data_base);
+}
+
 void RSSFeed::parse(const std::string& data) {
     tinyxml2::XMLDocument doc;
 
@@ -182,25 +220,23 @@ void RSSFeed::parse(const std::string& data) {
         }
 
         if (*event.get_date() > last_event) {
-            bool is_event_translated = false;
             auto event_translated = event;
             if (const tinyxml2::XMLElement* element = item->FirstChildElement("content:encoded")) {
                 std::string content = element->GetText();
                 auto result = parse_content(content);
                 event.set_content(result);
+                std::string result_translated;
                 if (is_gemini_available) {
-                    auto result_translated = fetch_gemini_translate(result);
+                    result_translated = fetch_gemini_translate(result);
                     event_translated.set_content(result_translated);
-                    is_event_translated = true;
                 }
+                store_to_sqlite3(mktime(event.get_date()), event.get_title(), content, result, result_translated);
             } else {
                 Bot::Log(dpp::ll_error, "RSS Event not contained pubDate");
                 continue;
             }
             Bot::SendNews(event);
-            if (is_event_translated) {
-                Bot::SendNewsTranslated(event_translated);
-            }
+            Bot::SendNewsTranslated(event_translated);
             last_event = *event.get_date();
         } else {
             break;

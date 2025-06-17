@@ -8,6 +8,7 @@ sudo apt-get install libssl-dev
 sudo apt-get install libyaml-cpp-dev
 sudo apt-get install libtinyxml2-dev
 sudo apt-get install libcurl4-openssl-dev
+sudo apt-get install libsqlite3-dev
 ```
 
 # Build
